@@ -1,6 +1,7 @@
 package be.kul.gantry.solution;
 
 import be.kul.gantry.domain.Problem;
+import be.kul.gantry.domain.Slot;
 
 import java.io.File;
 
@@ -15,7 +16,6 @@ public class Main {
 
         try {
             Problem problem = Problem.fromJson(inputFile);
-            System.out.println(problem.getMaxX());
         } catch (Exception e) {
             System.err.println(e);
         }

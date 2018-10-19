@@ -2,7 +2,7 @@
 
 Er staat een lege slot tussen de inputslot en de opslagplaats, dit ook voor de output.
 
-## Kraanopdracht1
+## Kraanopdracht 1
 
 * 1 kraan
 * containers staan **recht** op elkaar

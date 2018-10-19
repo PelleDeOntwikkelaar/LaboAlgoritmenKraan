@@ -7,9 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-  </component>
-  <component name="sonarModuleSettings">
-    <option name="localAnalysisScripName" value="&lt;PROJECT&gt;" />
-    <option name="serverName" value="&lt;PROJECT&gt;" />
+    <orderEntry type="library" name="validator-v7" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
   </component>
 </module>

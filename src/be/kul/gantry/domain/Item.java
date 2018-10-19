@@ -7,6 +7,8 @@ public class Item {
 
     private final int id;
 
+    private int slotID;
+
     public Item(int id) {
         this.id = id;
     }
@@ -14,4 +16,13 @@ public class Item {
     public int getId() {
         return id;
     }
+
+    public int getSlotID() {
+        return slotID;
+    }
+
+    public void setSlotID(int slotID) {
+        this.slotID = slotID;
+    }
+
 }

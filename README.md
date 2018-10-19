@@ -6,9 +6,9 @@ We overlopen eerst de output jobs en dan de input jobs. Als de outputcontainer
 niet aanwezig is controleren we de inputjobs. Als we de outputjob niet direct kunnen
 doen dan maken we nieuwe jobs in een priority queue die we eerst uitvoeren.
 
-Hoe gaan we de best plaats kiezen???
+Hoe gaan we de beste plaats kiezen???
 
-Kunnen de x en y beweging tegelijk gedaan worden?
+De x en y beweging kan tegelijk gedaan worden.
 
 ## Kraanopdracht 1
 

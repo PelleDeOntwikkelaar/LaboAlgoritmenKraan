@@ -11,6 +11,7 @@ public class Slots {
     private ArrayList<ArrayList> slotArrayYDimension;
     private Set<Slot>available;
     private List<Item> items;
+    private List<Item>itemsInStorage;
     private int yDimension;
     private int xDimenseion;
     private int maxLevels;
@@ -26,6 +27,7 @@ public class Slots {
         this.maxLevels=maxLevels;
         this.slotArrayYDimension = new ArrayList<>();
         this.available=new HashSet<>();
+        this.itemsInStorage=new ArrayList<>();
         generateYList();
     }
 
@@ -42,8 +44,11 @@ public class Slots {
                 int y= (slot.getCenterY()-5)/10;
                 int x= ((slot.getCenterX()-5)/10)+ slot.getZ()*xDimenseion;
                 slotArrayYDimension.get(y).add(x,slot);
-                if(slot.getZ()==0){
+                if(slot.getItem()==null){
                     available.add(slot);
+                }else{
+                    slot.getItem().setSlotID(slot);
+                    itemsInStorage.add(slot.getItem());
                 }
             }else if(slot.isInputSlot()){
                 inputSlot=slot;
@@ -63,9 +68,21 @@ public class Slots {
         return null;
     }
 
-    public int findSlotByItem(){
-        //todo: implement method
-        return -1;
+    public Slot calculateDropOffSlot(List<Slot> forbiddenSlots){
+        if(forbiddenSlots!=null){
+
+        }
+        return null;
+    }
+
+    public Slot findSlotByItem(Item item){
+        if(!itemsInStorage.contains(item)){
+            return null;
+        }else {
+            int index = itemsInStorage.indexOf(item);
+            return itemsInStorage.get(index).getSlotID();
+
+        }
     }
 
 

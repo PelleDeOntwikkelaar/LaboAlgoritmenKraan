@@ -7,7 +7,7 @@ public class Item {
 
     private final int id;
 
-    private int slotID;
+    private Slot slot;
 
     public Item(int id) {
         this.id = id;
@@ -17,12 +17,12 @@ public class Item {
         return id;
     }
 
-    public int getSlotID() {
-        return slotID;
+    public Slot getSlotID() {
+        return slot;
     }
 
-    public void setSlotID(int slotID) {
-        this.slotID = slotID;
+    public void setSlotID(Slot slot) {
+        this.slot = slot;
     }
 
 }

@@ -13,14 +13,18 @@ public class Main {
     public static void main(String[] args){
 
         File inputFile = new File("1_10_100_4_FALSE_65_50_50.json");
-
+        Problem problem;
+        Solution solution;
         try {
-            Problem problem = Problem.fromJson(inputFile);
+            problem = Problem.fromJson(inputFile);
+            solution = new Solution(problem);
+            solution.solveNextJob();
         } catch (Exception e) {
             System.err.println(e);
         }
 
 
+        System.out.println("hello");
 
 
     }

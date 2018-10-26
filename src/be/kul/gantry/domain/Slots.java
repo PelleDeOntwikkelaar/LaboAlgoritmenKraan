@@ -8,7 +8,7 @@ import java.util.Set;
 public class Slots {
     private Slot inputSlot;
     private Slot outputSlot;
-    private ArrayList<ArrayList> slotArrayYDimension;
+    private ArrayList<ArrayList<Slot>> slotArrayYDimension;
     private Set<Slot>available;
     private List<Item> items;
     private List<Item>itemsInStorage;
@@ -17,7 +17,14 @@ public class Slots {
     private int maxLevels;
     private boolean geschrankt;
 
-
+    /**
+     * De default constructor voor de klasse Slots
+     * @param items Een lijst met alle items in de probleemstelling
+     * @param maxX  Een integer waarde die de maximale X dimensie bevat
+     * @param maxY  Een intiger waarde die de maximale Y dimensie bevat
+     * @param maxLevels Een integet waarde die het maximaal aantal levels dat er gestapeld mag worden bevat.
+     * @param geschrankt Een boolean waarde die erop wijst of er geschrankt gestapeld kan worden.
+     */
     public Slots(List<Item> items,int maxX,int maxY,int maxLevels,boolean geschrankt) {
 
         this.items=items;
@@ -31,31 +38,52 @@ public class Slots {
         generateYList();
     }
 
+    /**
+     * Void methode die ervoor zorgt dat in de Y dimensies de juiste rijen gedeclareerd worden.
+     */
     private void generateYList() {
         for(int i=0;i<yDimension;i++){
             slotArrayYDimension.add(new ArrayList<Slot>());
         }
     }
 
+    /**
+     * Methode die de slots op een goede manier gaat aanmaken en alle parameters zet.
+     * @param slots Een lijst van Slots die gegeven worden in de probleemstelling.
+     */
     public void addSlots(List<Slot> slots){
         //werkt enkel voor niet geschrankt
-        for (Slot slot : slots){
-            if(slot.isStorageSlot()){
-                int y= (slot.getCenterY()-5)/10;
-                int x= ((slot.getCenterX()-5)/10)+ slot.getZ()*xDimenseion;
-                slotArrayYDimension.get(y).add(x,slot);
-                if(slot.getItem()==null){
-                    available.add(slot);
-                }else{
+        /*
+            wanneer we te maken hebben met een opslag slot, moet deze op de juiste manier worden aangemaakt en ingpast
+            worden.
+            */
+        for (Slot slot : slots)
+            if (slot.isStorageSlot()) {
+                int y = (slot.getCenterY() - 5) / 10;
+                int x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimenseion;
+                slotArrayYDimension.get(y).add(x, slot);
+
+                /*
+                De volgende logica is bedoeld om de juiste slots "beschikbaar" te maken.
+                Zo zijn slots beschikbaar waneer ze geen item bevatten en er onder hun ofwel grond is,
+                 ofwel een bezet slot.
+                 */
+                if (slot.getItem() == null) {
+                    if (slot.getZ() == 0) {
+                        available.add(slot);
+                    } else if (findSlot(slot.getCenterX(), slot.getCenterY(), slot.getZ() - 1).getItem() == null) {
+                        available.add(slot);
+                    }
+
+                } else {
                     slot.getItem().setSlotID(slot);
                     itemsInStorage.add(slot.getItem());
                 }
-            }else if(slot.isInputSlot()){
-                inputSlot=slot;
-            }else{
-                outputSlot=slot;
+            } else if (slot.isInputSlot()) {
+                inputSlot = slot;
+            } else {
+                outputSlot = slot;
             }
-        }
     }
 
     public boolean isSlotAvailable(Slot slot){
@@ -73,6 +101,14 @@ public class Slots {
 
         }
         return null;
+    }
+
+    public Slot findSlot(int x, int y, int z){
+
+        y = (y - 5) / 10;
+        x = ((x - 5) / 10) + z * xDimenseion;
+
+        return slotArrayYDimension.get(y).get(x);
     }
 
     public Slot findSlotByItem(Item item){

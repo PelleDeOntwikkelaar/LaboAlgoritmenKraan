@@ -32,6 +32,7 @@ public class Solution {
         ((LinkedList<Job>) inputQueue).addAll(0,problem.getInputJobSequence());
         ((LinkedList<Job>) outputQueue).addAll(0,problem.getOutputJobSequence());
         jobToSolve=null;
+        slots.addSlots(problem.getSlots());
     }
 
     public void solveNextJob(){

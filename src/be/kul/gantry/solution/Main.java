@@ -18,7 +18,7 @@ public class Main {
         try {
             problem = Problem.fromJson(inputFile);
             solution = new Solution(problem);
-            solution.solveNextJob();
+            System.out.println("Hello World");
         } catch (Exception e) {
             System.err.println(e);
         }

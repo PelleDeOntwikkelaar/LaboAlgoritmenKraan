@@ -1,5 +1,6 @@
 package be.kul.gantry.solution;
 
+import be.kul.gantry.Extra.CSVFileWriter;
 import be.kul.gantry.domain.Job;
 import be.kul.gantry.domain.Problem;
 import be.kul.gantry.domain.Slot;
@@ -22,7 +23,10 @@ public class Solution {
     private int currentX;
     private int currentY;
 
-    public Solution(Problem problem) {
+    private CSVFileWriter csvFileWriter;
+
+    public Solution(Problem problem, CSVFileWriter csvFileWriter) {
+        this.csvFileWriter=csvFileWriter;
         this.problem = problem;
         initializeParameters();
     }
@@ -68,6 +72,7 @@ public class Solution {
             slots.addItemToSlot(jobToSolve.getItem(), bestFit);
         }
         System.out.println(jobToSolve);
+        csvFileWriter.addLine(jobToSolve.toString());
         jobToSolve = null;
     }
 
@@ -82,12 +87,14 @@ public class Solution {
             slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
         }
         System.out.println(jobToSolve);
+        csvFileWriter.addLine(jobToSolve.toString());
         jobToSolve = null;
     }
 
     private void solvePrecedingJob() {
         //todo: execution of a preceding job
         System.out.println(jobToSolve.toString());
+        csvFileWriter.addLine(jobToSolve.toString());
         jobToSolve = null;
 
     }

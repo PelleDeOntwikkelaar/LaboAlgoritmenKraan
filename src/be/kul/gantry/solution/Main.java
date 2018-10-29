@@ -1,5 +1,6 @@
 package be.kul.gantry.solution;
 
+import be.kul.gantry.Extra.CSVFileWriter;
 import be.kul.gantry.domain.Problem;
 
 import java.io.File;
@@ -14,16 +15,16 @@ public class Main {
         File inputFile = new File("1_10_100_4_FALSE_65_50_50.json");
         Problem problem;
         Solution solution;
+        CSVFileWriter csvFileWriter = new CSVFileWriter();
         try {
             problem = Problem.fromJson(inputFile);
-            solution = new Solution(problem);
+            solution = new Solution(problem,csvFileWriter);
             solution.solve();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        csvFileWriter.flush();
 
-
-        System.out.println("hello");
 
 
     }

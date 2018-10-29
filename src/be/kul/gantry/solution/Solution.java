@@ -46,7 +46,7 @@ public class Solution {
         if (!precedingJobs.isEmpty()) {
             // we'll solve a preceding job
             jobToSolve = precedingJobs.poll();
-            solveJob();
+            solvePrecedingJob();
         } else if (!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) {
             // if the item we want to extract isn't in storage we'll do an input job
             if (!inputQueue.isEmpty()) {
@@ -85,9 +85,8 @@ public class Solution {
         jobToSolve = null;
     }
 
-    private void solveJob() {
-        //todo: implementatie van de job solver, deze bestaat uit de aard van de job uitzoek, ten minste de drop off locatie of pickup locatie berekenen.
-        //na het uitvoeren van de job moet de jobToSolve varibele terug op null gezet worden.
+    private void solvePrecedingJob() {
+        //todo: execution of a preceding job
         System.out.println(jobToSolve.toString());
         jobToSolve = null;
 

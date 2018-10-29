@@ -89,7 +89,7 @@ public class Slots {
     }
 
     public Slot findBestSlot(int zone, int currentX, int currentY) {
-        //todo: improve method
+        //todo think of an exact strategy to chose the best slot
         for (Slot slot:slotArrayYDimension.get(currentY)){
             if (slot.getItem()==null) return slot;
         }
@@ -126,19 +126,30 @@ public class Slots {
         }
     }
 
+    /**
+     * Fully set an item for a slot
+     * @param item
+     * @param slot
+     */
     public void addItemToSlot(Item item, Slot slot){
         slot.setItem(item);
         item.setSlotID(slot);
         itemsInStorage.add(item);
     }
 
+    /**
+     * Fully removes an item from a slot
+     * @param item
+     * @param slot
+     */
     public void removeItemFromSlot(Item item, Slot slot){
         slot.setItem(null);
         item.setSlotID(null);
         itemsInStorage.remove(item);
     }
 
-    /**Checks all slots above the current slot for items
+    /**
+     * Checks all slots above the current slot for items
      * @param slot
      * @return A list containing all slots where an items needs to be moved first
      */
@@ -168,7 +179,4 @@ public class Slots {
 
     }
 
-    public ArrayList<ArrayList<Slot>> getSlotArrayYDimension() {
-        return slotArrayYDimension;
-    }
 }

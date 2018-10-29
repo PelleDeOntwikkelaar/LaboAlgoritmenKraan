@@ -1,9 +1,6 @@
 package be.kul.gantry.domain;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Slots {
     private Slot inputSlot;
@@ -120,9 +117,54 @@ public class Slots {
         return true;
     }
 
+    public Slot findSlotByItem(Item item) {
+        if (!itemsInStorage.contains(item)) {
+            return null;
+        } else {
+            int index = itemsInStorage.indexOf(item);
+            return itemsInStorage.get(index).getSlotID();
+        }
+    }
+
     public void addItemToSlot(Item item, Slot slot){
         slot.setItem(item);
+        item.setSlotID(slot);
         itemsInStorage.add(item);
+    }
+
+    public void removeItemFromSlot(Item item, Slot slot){
+        slot.setItem(null);
+        item.setSlotID(null);
+        itemsInStorage.remove(item);
+    }
+
+    /**Checks all slots above the current slot for items
+     * @param slot
+     * @return A list containing all slots where an items needs to be moved first
+     */
+    public LinkedList<Slot> getStackedItemSlots(Slot slot){
+        // the list we'll return
+        LinkedList<Slot> list = new LinkedList<>();
+
+        // amount of containers on the lowest level on a row
+        int baseSize;
+        // row of the slot
+        int row = slot.getYMin()/10;
+
+        if (!shifted) {
+            baseSize = slotArrayYDimension.get(0).size()/maxLevels;
+
+            for (int i = 0; i < maxLevels - slot.getZ(); i++) {
+                // checking all slots above current slot for items
+                Slot slt = slotArrayYDimension.get(row).get((slot.getXMin()/10)+(i*baseSize));
+                if (slt.getItem() != null) list.add(slt);
+                else return list;
+            } return list;
+
+        } else {
+            //todo shifted rows
+            return null;
+        }
 
     }
 

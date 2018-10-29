@@ -25,4 +25,10 @@ public class Item {
         this.slot = slot;
     }
 
+    @Override
+    public String toString() {
+        return "Item{" +
+                "slot=" + slot +
+                '}';
+    }
 }

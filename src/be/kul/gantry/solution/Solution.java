@@ -72,8 +72,17 @@ public class Solution {
     }
 
     private void solveOutputJob(){
-        //todo set pickup slot for job and check if possible
+        if (jobToSolve.getPickup().getSlot() == null){
+            Slot slot = slots.findSlotByItem(jobToSolve.getItem());
+            jobToSolve.getPickup().setSlot(slot);
 
+            if (!slots.getStackedItemSlots(slot).isEmpty()) {
+                //todo make new preceding jobs and execute them first
+            }
+            slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
+        }
+        System.out.println(jobToSolve);
+        jobToSolve = null;
     }
 
     private void solveJob() {
@@ -85,7 +94,7 @@ public class Solution {
     }
 
     public void solve() {
-        while ((!inputQueue.isEmpty() || !outputQueue.isEmpty()) && jobToSolve == null) {
+        while (!inputQueue.isEmpty() && !outputQueue.isEmpty() && jobToSolve == null) {
             solveNextJob();
         }
     }

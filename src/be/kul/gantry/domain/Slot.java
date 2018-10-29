@@ -6,7 +6,7 @@ package be.kul.gantry.domain;
 public class Slot {
 
     private final int id;
-    private final int centerX, centerY, xMin, xMax, yMin, yMax,z;
+    private final int centerX, centerY, xMin, xMax, yMin, yMax, z;
     private Item item;
     private final SlotType type;
 
@@ -67,15 +67,21 @@ public class Slot {
         return type;
     }
 
-    public boolean isInputSlot() { return type == SlotType.INPUT; }
+    public boolean isInputSlot() {
+        return type == SlotType.INPUT;
+    }
 
-    public boolean isOutputSlot() { return type == SlotType.OUTPUT; }
+    public boolean isOutputSlot() {
+        return type == SlotType.OUTPUT;
+    }
 
-    public boolean isStorageSlot() { return type == SlotType.STORAGE; }
+    public boolean isStorageSlot() {
+        return type == SlotType.STORAGE;
+    }
 
     @Override
     public String toString() {
-        return String.format("Slot %d (%d,%d,%d)",id,centerX,centerY,z);
+        return String.format("Slot %d (%d,%d,%d)", id, centerX, centerY, z);
     }
 
     public static enum SlotType {

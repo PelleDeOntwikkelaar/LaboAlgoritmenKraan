@@ -1,7 +1,6 @@
 package be.kul.gantry.domain;
 
 
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.json.simple.JSONArray;
@@ -33,7 +32,8 @@ public class Problem {
 
     public Problem(int minX, int maxX, int minY, int maxY, int maxLevels,
                    List<Item> items, List<Gantry> gantries, List<Slot> slots,
-                   List<Job> inputJobSequence, List<Job> outputJobSequence, int gantrySafetyDist, int pickupPlaceDuration) {
+                   List<Job> inputJobSequence, List<Job> outputJobSequence,
+                   int gantrySafetyDist, int pickupPlaceDuration) {
         this.minX = minX;
         this.maxX = maxX;
         this.minY = minY;
@@ -100,80 +100,80 @@ public class Problem {
         JSONObject root = new JSONObject();
 
         JSONObject parameters = new JSONObject();
-        root.put("parameters",parameters);
+        root.put("parameters", parameters);
 
-        parameters.put("gantrySafetyDistance",safetyDistance);
-        parameters.put("maxLevels",maxLevels);
-        parameters.put("pickupPlaceDuration",pickupPlaceDuration);
+        parameters.put("gantrySafetyDistance", safetyDistance);
+        parameters.put("maxLevels", maxLevels);
+        parameters.put("pickupPlaceDuration", pickupPlaceDuration);
 
         JSONArray items = new JSONArray();
-        root.put("items",items);
+        root.put("items", items);
 
-        for(Item item : this.items) {
+        for (Item item : this.items) {
             JSONObject jo = new JSONObject();
-            jo.put("id",item.getId());
+            jo.put("id", item.getId());
 
             items.add(jo);
         }
 
 
         JSONArray slots = new JSONArray();
-        root.put("slots",slots);
-        for(Slot slot : this.slots) {
+        root.put("slots", slots);
+        for (Slot slot : this.slots) {
             JSONObject jo = new JSONObject();
-            jo.put("id",slot.getId());
-            jo.put("cx",slot.getCenterX());
-            jo.put("cy",slot.getCenterY());
-            jo.put("minX",slot.getXMin());
-            jo.put("maxX",slot.getXMax());
-            jo.put("minY",slot.getYMin());
-            jo.put("maxY",slot.getYMax());
-            jo.put("z",slot.getZ());
-            jo.put("type",slot.getType().name());
-            jo.put("itemId",slot.getItem() == null ? null : slot.getItem().getId());
+            jo.put("id", slot.getId());
+            jo.put("cx", slot.getCenterX());
+            jo.put("cy", slot.getCenterY());
+            jo.put("minX", slot.getXMin());
+            jo.put("maxX", slot.getXMax());
+            jo.put("minY", slot.getYMin());
+            jo.put("maxY", slot.getYMax());
+            jo.put("z", slot.getZ());
+            jo.put("type", slot.getType().name());
+            jo.put("itemId", slot.getItem() == null ? null : slot.getItem().getId());
 
             slots.add(jo);
         }
 
         JSONArray gantries = new JSONArray();
-        root.put("gantries",gantries);
-        for(Gantry gantry : this.gantries) {
+        root.put("gantries", gantries);
+        for (Gantry gantry : this.gantries) {
             JSONObject jo = new JSONObject();
 
-            jo.put("id",gantry.getId());
-            jo.put("xMin",gantry.getXMin());
-            jo.put("xMax",gantry.getXMax());
-            jo.put("startX",gantry.getStartX());
-            jo.put("startY",gantry.getStartY());
-            jo.put("xSpeed",gantry.getXSpeed());
-            jo.put("ySpeed",gantry.getYSpeed());
+            jo.put("id", gantry.getId());
+            jo.put("xMin", gantry.getXMin());
+            jo.put("xMax", gantry.getXMax());
+            jo.put("startX", gantry.getStartX());
+            jo.put("startY", gantry.getStartY());
+            jo.put("xSpeed", gantry.getXSpeed());
+            jo.put("ySpeed", gantry.getYSpeed());
 
             gantries.add(jo);
         }
 
         JSONArray inputSequence = new JSONArray();
-        root.put("inputSequence",inputSequence);
+        root.put("inputSequence", inputSequence);
 
-        for(Job inputJ : this.inputJobSequence) {
+        for (Job inputJ : this.inputJobSequence) {
             JSONObject jo = new JSONObject();
-            jo.put("itemId",inputJ.getItem().getId());
-            jo.put("fromId",inputJ.getPickup().getSlot().getId());
+            jo.put("itemId", inputJ.getItem().getId());
+            jo.put("fromId", inputJ.getPickup().getSlot().getId());
 
             inputSequence.add(jo);
         }
 
         JSONArray outputSequence = new JSONArray();
-        root.put("outputSequence",outputSequence);
+        root.put("outputSequence", outputSequence);
 
-        for(Job outputJ : this.outputJobSequence) {
+        for (Job outputJ : this.outputJobSequence) {
             JSONObject jo = new JSONObject();
-            jo.put("itemId",outputJ.getItem().getId());
-            jo.put("toId",outputJ.getPlace().getSlot().getId());
+            jo.put("itemId", outputJ.getItem().getId());
+            jo.put("toId", outputJ.getPlace().getSlot().getId());
 
             outputSequence.add(jo);
         }
 
-        try(FileWriter fw = new FileWriter(file)) {
+        try (FileWriter fw = new FileWriter(file)) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
             fw.write(gson.toJson(root));
@@ -186,7 +186,7 @@ public class Problem {
 
         JSONParser parser = new JSONParser();
 
-        try(FileReader reader = new FileReader(file)) {
+        try (FileReader reader = new FileReader(file)) {
             JSONObject root = (JSONObject) parser.parse(reader);
 
             List<Item> itemList = new ArrayList<>();
@@ -196,13 +196,13 @@ public class Problem {
             List<Job> outputJobList = new ArrayList<>();
 
             JSONObject parameters = (JSONObject) root.get("parameters");
-            int safetyDist = ((Long)parameters.get("gantrySafetyDistance")).intValue();
-            int maxLevels = ((Long)parameters.get("maxLevels")).intValue();
-            int pickupPlaceDuration = ((Long)parameters.get("pickupPlaceDuration")).intValue();
+            int safetyDist = ((Long) parameters.get("gantrySafetyDistance")).intValue();
+            int maxLevels = ((Long) parameters.get("maxLevels")).intValue();
+            int pickupPlaceDuration = ((Long) parameters.get("pickupPlaceDuration")).intValue();
 
             JSONArray items = (JSONArray) root.get("items");
-            for(Object o : items) {
-                int id = ((Long)((JSONObject)o).get("id")).intValue();
+            for (Object o : items) {
+                int id = ((Long) ((JSONObject) o).get("id")).intValue();
 
                 Item c = new Item(id);
                 itemList.add(c);
@@ -213,44 +213,44 @@ public class Problem {
             int overallMinY = Integer.MAX_VALUE, overallMaxY = Integer.MIN_VALUE;
 
             JSONArray slots = (JSONArray) root.get("slots");
-            for(Object o : slots) {
+            for (Object o : slots) {
                 JSONObject slot = (JSONObject) o;
 
-                int id = ((Long)slot.get("id")).intValue();
-                int cx = ((Long)slot.get("cx")).intValue();
-                int cy = ((Long)slot.get("cy")).intValue();
-                int minX = ((Long)slot.get("minX")).intValue();
-                int minY = ((Long)slot.get("minY")).intValue();
-                int maxX = ((Long)slot.get("maxX")).intValue();
-                int maxY = ((Long)slot.get("maxY")).intValue();
-                int z = ((Long)slot.get("z")).intValue();
+                int id = ((Long) slot.get("id")).intValue();
+                int cx = ((Long) slot.get("cx")).intValue();
+                int cy = ((Long) slot.get("cy")).intValue();
+                int minX = ((Long) slot.get("minX")).intValue();
+                int minY = ((Long) slot.get("minY")).intValue();
+                int maxX = ((Long) slot.get("maxX")).intValue();
+                int maxY = ((Long) slot.get("maxY")).intValue();
+                int z = ((Long) slot.get("z")).intValue();
 
-                overallMinX = Math.min(overallMinX,minX);
-                overallMaxX = Math.max(overallMaxX,maxX);
-                overallMinY = Math.min(overallMinY,minY);
-                overallMaxY = Math.max(overallMaxY,maxY);
+                overallMinX = Math.min(overallMinX, minX);
+                overallMaxX = Math.max(overallMaxX, maxX);
+                overallMinY = Math.min(overallMinY, minY);
+                overallMaxY = Math.max(overallMaxY, maxY);
 
-                Slot.SlotType type = Slot.SlotType.valueOf((String)slot.get("type"));
-                Integer itemId = slot.get("itemId") == null ? null : ((Long)slot.get("itemId")).intValue();
+                Slot.SlotType type = Slot.SlotType.valueOf((String) slot.get("type"));
+                Integer itemId = slot.get("itemId") == null ? null : ((Long) slot.get("itemId")).intValue();
                 Item c = itemId == null ? null : itemList.get(itemId);
 
-                Slot s = new Slot(id,cx,cy,minX,maxX,minY,maxY,z,type,c);
+                Slot s = new Slot(id, cx, cy, minX, maxX, minY, maxY, z, type, c);
                 slotList.add(s);
             }
 
 
             JSONArray gantries = (JSONArray) root.get("gantries");
-            for(Object o : gantries) {
+            for (Object o : gantries) {
                 JSONObject gantry = (JSONObject) o;
 
 
-                int id = ((Long)gantry.get("id")).intValue();
-                int xMin = ((Long)gantry.get("xMin")).intValue();
-                int xMax = ((Long)gantry.get("xMax")).intValue();
-                int startX = ((Long)gantry.get("startX")).intValue();
-                int startY = ((Long)gantry.get("startY")).intValue();
-                double xSpeed = ((Double)gantry.get("xSpeed")).doubleValue();
-                double ySpeed = ((Double)gantry.get("ySpeed")).doubleValue();
+                int id = ((Long) gantry.get("id")).intValue();
+                int xMin = ((Long) gantry.get("xMin")).intValue();
+                int xMax = ((Long) gantry.get("xMax")).intValue();
+                int startX = ((Long) gantry.get("startX")).intValue();
+                int startY = ((Long) gantry.get("startY")).intValue();
+                double xSpeed = ((Double) gantry.get("xSpeed")).doubleValue();
+                double ySpeed = ((Double) gantry.get("ySpeed")).doubleValue();
 
                 Gantry g = new Gantry(id, xMin, xMax, startX, startY, xSpeed, ySpeed);
                 gantryList.add(g);
@@ -258,24 +258,24 @@ public class Problem {
 
             JSONArray inputJobs = (JSONArray) root.get("inputSequence");
             int jid = 0;
-            for(Object o : inputJobs) {
+            for (Object o : inputJobs) {
                 JSONObject inputJob = (JSONObject) o;
 
                 int iid = ((Long) inputJob.get("itemId")).intValue();
                 int sid = ((Long) inputJob.get("fromId")).intValue();
 
-                Job job = new Job(jid++,itemList.get(iid),slotList.get(sid),null);
+                Job job = new Job(jid++, itemList.get(iid), slotList.get(sid), null);
                 inputJobList.add(job);
             }
 
             JSONArray outputJobs = (JSONArray) root.get("outputSequence");
-            for(Object o : outputJobs) {
+            for (Object o : outputJobs) {
                 JSONObject outputJob = (JSONObject) o;
 
                 int iid = ((Long) outputJob.get("itemId")).intValue();
                 int sid = ((Long) outputJob.get("toId")).intValue();
 
-                Job job = new Job(jid++,itemList.get(iid),null, slotList.get(sid));
+                Job job = new Job(jid++, itemList.get(iid), null, slotList.get(sid));
                 outputJobList.add(job);
             }
 
@@ -297,7 +297,6 @@ public class Problem {
         }
 
     }
-
 
 
 }

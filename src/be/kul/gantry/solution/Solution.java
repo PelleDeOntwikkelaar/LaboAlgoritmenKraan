@@ -1,12 +1,10 @@
 package be.kul.gantry.solution;
 
 import be.kul.gantry.Extra.CSVFileWriter;
-import be.kul.gantry.domain.Job;
-import be.kul.gantry.domain.Problem;
-import be.kul.gantry.domain.Slot;
-import be.kul.gantry.domain.Slots;
+import be.kul.gantry.domain.*;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -20,8 +18,7 @@ public class Solution {
     private Job jobToSolve;
     private Problem problem;
 
-    private int currentX;
-    private int currentY;
+    private List<Gantry> gantries;
 
     private CSVFileWriter csvFileWriter;
 
@@ -40,10 +37,7 @@ public class Solution {
         ((LinkedList<Job>) outputQueue).addAll(0, problem.getOutputJobSequence());
         jobToSolve = null;
         slots.addSlots(problem.getSlots());
-
-        // has to change if we want to include a secondary gantry
-        currentX = problem.getGantries().get(0).getStartX();
-        currentY = problem.getGantries().get(0).getStartY();
+        gantries = problem.getGantries();
     }
 
     public void solveNextJob() {
@@ -66,13 +60,20 @@ public class Solution {
 
     private void solveInputJob(){
         //todo improve method
+
+        // If there's only one gantry
+        Gantry gantry = gantries.get(0);
+
         if (jobToSolve.getPlace().getSlot() == null) {
-            Slot bestFit = slots.findBestSlot(0, currentX, currentY);
+            Slot bestFit = slots.findBestSlot(0, gantry.getCurrentX(), gantry.getCurrentY());
             jobToSolve.getPlace().setSlot(bestFit);
             slots.addItemToSlot(jobToSolve.getItem(), bestFit);
         }
         System.out.println(jobToSolve);
-        csvFileWriter.addLine(jobToSolve.toString());
+
+        csvFileWriter.add(jobToSolve.getOutput(gantry));
+        //csvFileWriter.addLine(jobToSolve.toString());
+
         jobToSolve = null;
     }
 

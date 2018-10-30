@@ -10,6 +10,9 @@ public class Gantry {
     private final int startX,startY;
     private final double xSpeed,ySpeed;
 
+    private int currentX;
+    private int currentY;
+
     public Gantry(int id,
                   int xMin, int xMax,
                   int startX, int startY,
@@ -21,6 +24,9 @@ public class Gantry {
         this.startY = startY;
         this.xSpeed = xSpeed;
         this.ySpeed = ySpeed;
+
+        this.currentX = startX;
+        this.currentY = startY;
     }
 
     public int getId() {
@@ -49,6 +55,22 @@ public class Gantry {
 
     public double getYSpeed() {
         return ySpeed;
+    }
+
+    public int getCurrentX() {
+        return currentX;
+    }
+
+    public void setCurrentX(int currentX) {
+        this.currentX = currentX;
+    }
+
+    public int getCurrentY() {
+        return currentY;
+    }
+
+    public void setCurrentY(int currentY) {
+        this.currentY = currentY;
     }
 
     public boolean overlapsGantryArea(Gantry g) {

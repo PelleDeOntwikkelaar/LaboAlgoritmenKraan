@@ -16,31 +16,34 @@ public class CSVFileWriter {
     private StringBuilder stringBuilder;
 
     public CSVFileWriter() {
-        stringBuilder=new StringBuilder();
+        stringBuilder = new StringBuilder();
     }
 
-    public void addLine(String string){
+    public void addLine(String string) {
         //TODO: aanpassen om lijn op zo makkelijk mogelijke manier af te printen.
         stringBuilder.append(string);
         stringBuilder.append(NEW_LINE_SEPARATOR);
     }
 
-    public void flush(){
-        FileWriter fileWriter =null;
+    public void add(StringBuilder stb) {
+        stringBuilder.append(stb);
+    }
+
+    public void flush() {
+        FileWriter fileWriter = null;
 
         try {
-            fileWriter=new FileWriter(FILE_NAME);
+            fileWriter = new FileWriter(FILE_NAME);
             fileWriter.append(FILE_HEADER);
             fileWriter.append(NEW_LINE_SEPARATOR);
             fileWriter.append(stringBuilder.toString());
 
-
+            fileWriter.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
-                fileWriter.flush();
                 fileWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();

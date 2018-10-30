@@ -120,6 +120,7 @@ public class Solution {
     }
 
     public void executeJob(Job job, Gantry gantry) {
+        //todo tijd deftig berekenen en kijken of positie kraan juist naar de output geschreven wordt
         job.calculateTime(gantry);
         csvFileWriter.add(job.getOutput(gantry, time));
         time += job.getTime();

@@ -14,7 +14,7 @@ public class Solution {
     private Queue<Job> inputQueue;
     private Queue<Job> outputQueue;
 
-    private PriorityQueue<Job> precedingJobs;
+    private LinkedList<Job> precedingJobs;
     private Job jobToSolve;
     private Problem problem;
 
@@ -23,14 +23,14 @@ public class Solution {
     private CSVFileWriter csvFileWriter;
 
     public Solution(Problem problem, CSVFileWriter csvFileWriter) {
-        this.csvFileWriter=csvFileWriter;
+        this.csvFileWriter = csvFileWriter;
         this.problem = problem;
         initializeParameters();
     }
 
     private void initializeParameters() {
         slots = new Slots(problem.getItems(), problem.getMaxX(), problem.getMaxY(), problem.getMaxLevels(), false);
-        precedingJobs = new PriorityQueue<>();
+        precedingJobs = new LinkedList<>();
         inputQueue = new LinkedList<>();
         outputQueue = new LinkedList<>();
         ((LinkedList<Job>) inputQueue).addAll(0, problem.getInputJobSequence());
@@ -41,11 +41,7 @@ public class Solution {
     }
 
     public void solveNextJob() {
-        if (!precedingJobs.isEmpty()) {
-            // we'll solve a preceding job
-            jobToSolve = precedingJobs.poll();
-            solvePrecedingJob();
-        } else if (!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) {
+        if (!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) {
             // if the item we want to extract isn't in storage we'll do an input job
             if (!inputQueue.isEmpty()) {
                 jobToSolve = inputQueue.poll();
@@ -58,7 +54,7 @@ public class Solution {
         }
     }
 
-    private void solveInputJob(){
+    private void solveInputJob() {
         //todo improve method
 
         // If there's only one gantry
@@ -77,17 +73,27 @@ public class Solution {
         jobToSolve = null;
     }
 
-    private void solveOutputJob(){
+    private void solveOutputJob() {
 
         // If there's only one gantry
         Gantry gantry = gantries.get(0);
 
-        if (jobToSolve.getPickup().getSlot() == null){
+        if (jobToSolve.getPickup().getSlot() == null) {
             Slot slot = slots.findSlotByItem(jobToSolve.getItem());
             jobToSolve.getPickup().setSlot(slot);
 
             if (!slots.getStackedItemSlots(slot).isEmpty()) {
-                //todo make new preceding jobs and execute them first
+                //todo: make new preceding jobs and execute them first
+                for (Slot slt : slots.getStackedItemSlots(slot)) {
+                    Job job = new Job(1000, slt.getItem(), slt, null);
+                    job.getPickup().setSlot(slt);
+                    precedingJobs.addFirst(job);
+                }
+                // execute all preceding jobs
+                for (Job job : precedingJobs) {
+                    solvePrecedingJob(job, gantry);
+                }
+                precedingJobs.clear();
             }
             slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
         }
@@ -98,12 +104,18 @@ public class Solution {
         jobToSolve = null;
     }
 
-    private void solvePrecedingJob() {
-        //todo: execution of a preceding job
-        System.out.println(jobToSolve.toString());
-        csvFileWriter.addLine(jobToSolve.toString());
-        jobToSolve = null;
+    private void solvePrecedingJob(Job job, Gantry gantry) {
+        Slot bestFit = slots.findBestSlot(0, gantry.getCurrentX(), gantry.getCurrentY());
+        //todo: maybe a different method for best fit when it comes to preceding jobs
+        job.getPlace().setSlot(bestFit);
 
+        slots.removeItemFromSlot(job.getItem(), job.getPickup().getSlot());
+        slots.addItemToSlot(job.getItem(), bestFit);
+
+        System.out.println(job.toString());
+
+        csvFileWriter.add(job.getOutput(gantry));
+        //csvFileWriter.addLine(jobToSolve.toString());
     }
 
     public void solve() {

@@ -165,7 +165,7 @@ public class Slots {
         if (!shifted) {
             baseSize = slotArrayYDimension.get(0).size()/maxLevels;
 
-            for (int i = 0; i < maxLevels - slot.getZ(); i++) {
+            for (int i = slot.getZ()+ 1; i < maxLevels; i++) {
                 // checking all slots above current slot for items
                 Slot slt = slotArrayYDimension.get(row).get((slot.getXMin()/10)+(i*baseSize));
                 if (slt.getItem() != null) list.add(slt);

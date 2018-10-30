@@ -12,6 +12,8 @@ public class Job {
 
     private final Item item;
 
+    private double time;
+
 
     public Job(int id, Item c, Slot from, Slot to) {
         this.id = id;
@@ -38,12 +40,24 @@ public class Job {
         return item;
     }
 
-    public StringBuilder getOutput(Gantry gantry) {
+    public double getTime() {
+        return time;
+    }
+
+    public void calculateTime(Gantry gantry){
+        pickup.calculateTime(gantry);
+        place.calculateTime(gantry);
+        time = pickup.getTime() + place.getTime();
+
+        System.out.println("pickup: " + pickup.getTime() + ", place: " + place.getTime() + ", time: " + time);
+    }
+
+    public StringBuilder getOutput(Gantry gantry, double totalTime) {
         StringBuilder stb = new StringBuilder();
 
-        stb.append(pickup.getOutput(gantry));
+        stb.append(pickup.getOutput(gantry, totalTime));
         stb.append("\n");
-        stb.append(place.getOutput(gantry));
+        stb.append(place.getOutput(gantry, totalTime + pickup.getTime()));
         stb.append("\n");
 
         return stb;
@@ -51,7 +65,7 @@ public class Job {
 
     @Override
     public String toString() {
-        return String.format("J%d move %d from %s to %s",id,item.getId(),pickup.slot,place.slot);
+        return String.format("J%d move %d from %s to %s in %f",id,item.getId(),pickup.slot,place.slot,time);
     }
 
     public class Task {
@@ -59,6 +73,7 @@ public class Job {
         private Slot slot;
         private Job parentJob;
         private TaskType type;
+        private double time;
 
         public Task(int id, TaskType taskType) {
             this.id = id;
@@ -86,21 +101,24 @@ public class Job {
             return type;
         }
 
-        public StringBuilder getOutput(Gantry gantry) {
+        public double getTime() {
+            return time;
+        }
+
+        public StringBuilder getOutput(Gantry gantry, double totalTime) {
             StringBuilder stb = new StringBuilder();
 
             stb.append(gantry.getId());
             stb.append(";");
 
-            // time ergens bijhouden en optellen bij de berekende tijd
-            double time = calculateTime(gantry); // de huidige tijd moet hier nog bij en moet aangepast worden
-            stb.append(time);
+            stb.append(time + totalTime);
             stb.append(";");
 
-            // de positie van de gantry moet ook nog aangepast worden
+            gantry.setCurrentX(slot.getCenterX());
             stb.append(slot.getCenterX());
             stb.append(";");
 
+            gantry.setCurrentY(slot.getCenterY());
             stb.append(slot.getCenterY());
             stb.append(";");
 
@@ -111,14 +129,16 @@ public class Job {
             return stb;
         }
 
-        public double calculateTime(Gantry gantry) {
+        public void calculateTime(Gantry gantry) {
             int xDistance = Math.abs(slot.getCenterX() - gantry.getCurrentX());
             double xTime = xDistance/gantry.getXSpeed();
             int yDistance = Math.abs(slot.getCenterY() - gantry.getCurrentY());
             double yTime = yDistance/gantry.getYSpeed();
 
-            if (xTime >= yTime) return xTime;
-            return yTime;
+            if (xTime >= yTime) time = xTime;
+            else time = yTime;
+
+            System.out.println("x: " + xTime + ", y: " + yTime + ", time: " + time);
         }
 
         @Override

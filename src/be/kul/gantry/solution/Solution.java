@@ -20,6 +20,8 @@ public class Solution {
 
     private List<Gantry> gantries;
 
+    private double time;
+
     private CSVFileWriter csvFileWriter;
 
     public Solution(Problem problem, CSVFileWriter csvFileWriter) {
@@ -38,6 +40,7 @@ public class Solution {
         jobToSolve = null;
         slots.addSlots(problem.getSlots());
         gantries = problem.getGantries();
+        time = 0;
     }
 
     public void solveNextJob() {
@@ -65,10 +68,9 @@ public class Solution {
             jobToSolve.getPlace().setSlot(bestFit);
             slots.addItemToSlot(jobToSolve.getItem(), bestFit);
         }
-        System.out.println(jobToSolve);
 
-        csvFileWriter.add(jobToSolve.getOutput(gantry));
-        //csvFileWriter.addLine(jobToSolve.toString());
+        executeJob(jobToSolve, gantry);
+        System.out.println(jobToSolve);
 
         jobToSolve = null;
     }
@@ -97,25 +99,30 @@ public class Solution {
             }
             slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
         }
+
+        executeJob(jobToSolve, gantry);
         System.out.println(jobToSolve);
 
-        csvFileWriter.add(jobToSolve.getOutput(gantry));
-        //csvFileWriter.addLine(jobToSolve.toString());
         jobToSolve = null;
     }
 
     private void solvePrecedingJob(Job job, Gantry gantry) {
-        Slot bestFit = slots.findBestSlot(0, gantry.getCurrentX(), gantry.getCurrentY());
+        Slot pickupSlot = job.getPickup().getSlot();
+        Slot bestFit = slots.findBestSlot(0, pickupSlot.getCenterX(), pickupSlot.getCenterY());
         //todo: maybe a different method for best fit when it comes to preceding jobs
         job.getPlace().setSlot(bestFit);
 
-        slots.removeItemFromSlot(job.getItem(), job.getPickup().getSlot());
+        slots.removeItemFromSlot(job.getItem(), pickupSlot);
         slots.addItemToSlot(job.getItem(), bestFit);
 
+        executeJob(jobToSolve, gantry);
         System.out.println(job.toString());
+    }
 
-        csvFileWriter.add(job.getOutput(gantry));
-        //csvFileWriter.addLine(jobToSolve.toString());
+    public void executeJob(Job job, Gantry gantry) {
+        job.calculateTime(gantry);
+        csvFileWriter.add(job.getOutput(gantry, time));
+        time += job.getTime();
     }
 
     public void solve() {

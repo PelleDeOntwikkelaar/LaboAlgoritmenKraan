@@ -90,8 +90,8 @@ public class Slots {
 
     public Slot findBestSlot(int zone, int currentX, int currentY) {
         //todo think of an exact strategy to chose the best slot
-        for (Slot slot:slotArrayYDimension.get(currentY)){
-            if (slot.getItem()==null) return slot;
+        for (Slot slot : slotArrayYDimension.get((currentY-5)/10)) {
+            if (slot.getItem() == null) return slot;
         }
         return null;
     }
@@ -128,10 +128,11 @@ public class Slots {
 
     /**
      * Fully set an item for a slot
+     *
      * @param item
      * @param slot
      */
-    public void addItemToSlot(Item item, Slot slot){
+    public void addItemToSlot(Item item, Slot slot) {
         slot.setItem(item);
         item.setSlotID(slot);
         itemsInStorage.add(item);
@@ -139,10 +140,11 @@ public class Slots {
 
     /**
      * Fully removes an item from a slot
+     *
      * @param item
      * @param slot
      */
-    public void removeItemFromSlot(Item item, Slot slot){
+    public void removeItemFromSlot(Item item, Slot slot) {
         slot.setItem(null);
         item.setSlotID(null);
         itemsInStorage.remove(item);
@@ -150,27 +152,29 @@ public class Slots {
 
     /**
      * Checks all slots above the current slot for items
+     *
      * @param slot
      * @return A list containing all slots where an items needs to be moved first
      */
-    public LinkedList<Slot> getStackedItemSlots(Slot slot){
+    public LinkedList<Slot> getStackedItemSlots(Slot slot) {
         // the list we'll return
         LinkedList<Slot> list = new LinkedList<>();
 
         // amount of containers on the lowest level on a row
         int baseSize;
         // row of the slot
-        int row = slot.getYMin()/10;
+        int row = slot.getYMin() / 10;
 
         if (!shifted) {
-            baseSize = slotArrayYDimension.get(0).size()/maxLevels;
+            baseSize = slotArrayYDimension.get(0).size() / maxLevels;
 
-            for (int i = slot.getZ()+ 1; i < maxLevels; i++) {
+            for (int i = slot.getZ() + 1; i < maxLevels; i++) {
                 // checking all slots above current slot for items
-                Slot slt = slotArrayYDimension.get(row).get((slot.getXMin()/10)+(i*baseSize));
+                Slot slt = slotArrayYDimension.get(row).get((slot.getXMin() / 10) + (i * baseSize));
                 if (slt.getItem() != null) list.add(slt);
                 else return list;
-            } return list;
+            }
+            return list;
 
         } else {
             //todo shifted rows

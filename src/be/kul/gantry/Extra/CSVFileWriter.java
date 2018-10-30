@@ -19,12 +19,6 @@ public class CSVFileWriter {
         stringBuilder = new StringBuilder();
     }
 
-    public void addLine(String string) {
-        //TODO: aanpassen om lijn op zo makkelijk mogelijke manier af te printen.
-        stringBuilder.append(string);
-        stringBuilder.append(NEW_LINE_SEPARATOR);
-    }
-
     public void add(StringBuilder stb) {
         stringBuilder.append(stb);
     }

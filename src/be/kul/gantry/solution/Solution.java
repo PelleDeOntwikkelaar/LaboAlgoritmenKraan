@@ -78,6 +78,10 @@ public class Solution {
     }
 
     private void solveOutputJob(){
+
+        // If there's only one gantry
+        Gantry gantry = gantries.get(0);
+
         if (jobToSolve.getPickup().getSlot() == null){
             Slot slot = slots.findSlotByItem(jobToSolve.getItem());
             jobToSolve.getPickup().setSlot(slot);
@@ -88,7 +92,9 @@ public class Solution {
             slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
         }
         System.out.println(jobToSolve);
-        csvFileWriter.addLine(jobToSolve.toString());
+
+        csvFileWriter.add(jobToSolve.getOutput(gantry));
+        //csvFileWriter.addLine(jobToSolve.toString());
         jobToSolve = null;
     }
 

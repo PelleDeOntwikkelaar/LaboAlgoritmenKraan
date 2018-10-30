@@ -10,7 +10,7 @@ public class CSVFileWriter {
     private static final String NEW_LINE_SEPARATOR = "\n";
 
     //CSV file header
-    private static final String FILE_HEADER = " \"gID\";\"T\";\"x\";\"y\";\"itemInCraneID\" ";
+    private static final String FILE_HEADER = "\"gID\";\"T\";\"x\";\"y\";\"itemInCraneID\" ";
     private static final String FILE_NAME = "output.csv";
 
     private StringBuilder stringBuilder;

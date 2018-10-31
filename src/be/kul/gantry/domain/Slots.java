@@ -3,12 +3,21 @@ package be.kul.gantry.domain;
 import java.util.*;
 
 public class Slots {
+    //variables with the purpose of storing slots
     private Slot inputSlot;
     private Slot outputSlot;
     private ArrayList<ArrayList<Slot>> slotArrayYDimension;
-    private Set<Slot> available;
+
+    //Set of available Slots divided in zones.
+    private ArrayList<Set<Slot>> available;
+
+    //Set of items
     private List<Item> items;
+
+    //List of items currently in storage
     private ArrayList<Item> itemsInStorage;
+
+    //properties of the problem
     private int yDimension;
     private int xDimension;
     private int maxLevels;
@@ -31,7 +40,10 @@ public class Slots {
         this.shifted = shifted;
         this.maxLevels = maxLevels;
         this.slotArrayYDimension = new ArrayList<>();
-        this.available = new HashSet<>();
+        this.available = new ArrayList<Set<Slot>>();
+        for (int i=0;i<4;i++){
+            available.add(new HashSet<Slot>());
+        }
         this.itemsInStorage = new ArrayList<>();
         generateYList();
     }
@@ -69,8 +81,8 @@ public class Slots {
                  */
                 if (slot.getItem() == null) {
                     if (slot.getZ() == 0 ||
-                            findSlot(slot.getCenterX(), slot.getCenterY(), slot.getZ() - 1).getItem() == null) {
-                        available.add(slot);
+                            findSlot(slot.getCenterX(), slot.getCenterY(), slot.getZ() - 1).getItem() != null) {
+                        addToAvailable(slot);
                     }
                 } else {
                     slot.getItem().setSlotID(slot);
@@ -83,17 +95,49 @@ public class Slots {
             }
     }
 
+    private void addToAvailable(Slot slot) {
+        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        if(x<xDimension/4)available.get(0).add(slot);
+        else if(x<xDimension/2)available.get(1).add(slot);
+        else if (x<xDimension*3/4)available.get(2).add(slot);
+        else available.get(3).add(slot);
+    }
+
+    private void removeFromAvailable(Slot slot) {
+        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        if(x<xDimension/4)available.get(0).remove(slot);
+        else if(x<xDimension/2)available.get(1).remove(slot);
+        else if (x<xDimension*3/4)available.get(2).remove(slot);
+        else available.get(3).remove(slot);
+
+    }
+
     public boolean isSlotAvailable(Slot slot) {
         if (available.contains(slot)) return true;
         return false;
     }
 
     public Slot findBestSlot(int zone, int currentX, int currentY) {
+
         //todo think of an exact strategy to chose the best slot
         for (Slot slot : slotArrayYDimension.get((currentY-5)/10)) {
             if (slot.getItem() == null) return slot;
         }
         return null;
+    }
+
+    public int calculateZone(Item item, Queue<Job> outputQueue){
+        int i=0;
+        for(Job job : outputQueue){
+            if(job.getItem().getId()==item.getId()){
+                if(i<10) return 3;
+                else if(i<20) return 2;
+                else if(i<30) return 1;
+                else return 0;
+            }
+            i++;
+        }
+        return 0;
     }
 
     public Slot calculateDropOffSlot(List<Slot> forbiddenSlots) {
@@ -112,6 +156,12 @@ public class Slots {
         return slotArrayYDimension.get(y).get(x);
     }
 
+    /**
+     * Checks if item is in storage.
+     *
+     * @param item to check.
+     * @return True or false whether item is in storage.
+     */
     public Boolean containsItem(Item item) {
         if (!itemsInStorage.contains(item)) return false;
         return true;
@@ -136,7 +186,9 @@ public class Slots {
         slot.setItem(item);
         item.setSlotID(slot);
         itemsInStorage.add(item);
+        removeFromAvailable(slot);
     }
+
 
     /**
      * Fully removes an item from a slot
@@ -148,6 +200,7 @@ public class Slots {
         slot.setItem(null);
         item.setSlotID(null);
         itemsInStorage.remove(item);
+        addToAvailable(slot);
     }
 
     /**

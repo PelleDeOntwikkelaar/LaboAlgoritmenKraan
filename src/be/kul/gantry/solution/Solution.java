@@ -9,20 +9,23 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class Solution {
+
+    private Problem problem;
+    private CSVFileWriter csvFileWriter;
+
     private Slots slots;
 
     private Queue<Job> inputQueue;
     private Queue<Job> outputQueue;
-
     private LinkedList<Job> precedingJobs;
+
     private Job jobToSolve;
-    private Problem problem;
 
     private List<Gantry> gantries;
 
     private double time;
 
-    private CSVFileWriter csvFileWriter;
+
 
     public Solution(Problem problem, CSVFileWriter csvFileWriter) {
         this.csvFileWriter = csvFileWriter;
@@ -31,19 +34,23 @@ public class Solution {
     }
 
     private void initializeParameters() {
+        //Slots object is initialized with correct parameters.
         slots = new Slots(problem.getItems(), problem.getMaxX(), problem.getMaxY(), problem.getMaxLevels(), false);
+        //queues are provided
         precedingJobs = new LinkedList<>();
         inputQueue = new LinkedList<>();
         outputQueue = new LinkedList<>();
         ((LinkedList<Job>) inputQueue).addAll(0, problem.getInputJobSequence());
         ((LinkedList<Job>) outputQueue).addAll(0, problem.getOutputJobSequence());
         jobToSolve = null;
+        //Slots are being put into place, with correct parameters and dimensions
         slots.addSlots(problem.getSlots());
         gantries = problem.getGantries();
         time = 0;
     }
 
     public void solveNextJob() {
+
         if (!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) {
             // if the item we want to extract isn't in storage we'll do an input job
             if (!inputQueue.isEmpty()) {
@@ -64,7 +71,13 @@ public class Solution {
         Gantry gantry = gantries.get(0);
 
         if (jobToSolve.getPlace().getSlot() == null) {
-            Slot bestFit = slots.findBestSlot(0, gantry.getCurrentX(), gantry.getCurrentY());
+            //calculate drop off zone
+            int zone= slots.calculateZone(jobToSolve.getItem(), outputQueue);
+
+            //calculate drop off slot
+            Slot bestFit = slots.findBestSlot(zone, gantry.getCurrentX(), gantry.getCurrentY());
+
+            //update Job parameters
             jobToSolve.getPlace().setSlot(bestFit);
             slots.addItemToSlot(jobToSolve.getItem(), bestFit);
         }
@@ -127,10 +140,11 @@ public class Solution {
     }
 
     public void solve() {
-        while (!inputQueue.isEmpty() && !outputQueue.isEmpty() && jobToSolve == null) {
+        while (!(inputQueue.isEmpty() && outputQueue.isEmpty() && jobToSolve == null && precedingJobs.isEmpty())) {
             solveNextJob();
         }
     }
+
 
 
 }

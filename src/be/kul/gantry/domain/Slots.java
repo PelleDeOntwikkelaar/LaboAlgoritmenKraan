@@ -95,49 +95,70 @@ public class Slots {
             }
     }
 
-    private void addToAvailable(Slot slot) {
-        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
-        if(x<xDimension/4)available.get(0).add(slot);
-        else if(x<xDimension/2)available.get(1).add(slot);
-        else if (x<xDimension*3/4)available.get(2).add(slot);
-        else available.get(3).add(slot);
-    }
+    /**
+     * Find slot to store item, with logic.
+     * @param zone
+     * @param currentX
+     * @param currentY
+     * @param xSpeed
+     * @param ySpeed
+     * @return
+     */
+    public Slot findBestSlot(int zone, int currentX, int currentY, double xSpeed, double ySpeed) {
 
-    private void removeFromAvailable(Slot slot) {
-        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
-        if(x<xDimension/4)available.get(0).remove(slot);
-        else if(x<xDimension/2)available.get(1).remove(slot);
-        else if (x<xDimension*3/4)available.get(2).remove(slot);
-        else available.get(3).remove(slot);
+        Slot destinationSlot =null;
+        double timeNeeded = Math.max(xDimension*xSpeed,yDimension*ySpeed);
 
-    }
+        for(Slot slot : available.get(zone)){
+            int x = Math.abs(currentX-slot.getCenterX());
+            int y = Math.abs(currentY-slot.getCenterY());
+            double time=Math.max(x*xSpeed,y*ySpeed);
+            if(time<timeNeeded){
+                timeNeeded=time;
+                destinationSlot=slot;
+            }
 
-    public boolean isSlotAvailable(Slot slot) {
-        if (available.contains(slot)) return true;
-        return false;
-    }
-
-    public Slot findBestSlot(int zone, int currentX, int currentY) {
-
-        //todo think of an exact strategy to chose the best slot
-        for (Slot slot : slotArrayYDimension.get((currentY-5)/10)) {
-            if (slot.getItem() == null) return slot;
         }
-        return null;
+        return destinationSlot;
     }
 
+    /**
+     * Method to calculate the perfect drop off zone for a given item.
+     * @param item
+     * @param outputQueue
+     * @return
+     */
     public int calculateZone(Item item, Queue<Job> outputQueue){
         int i=0;
+        int zone=0;
         for(Job job : outputQueue){
             if(job.getItem().getId()==item.getId()){
-                if(i<10) return 3;
-                else if(i<20) return 2;
-                else if(i<30) return 1;
-                else return 0;
+                if(i<10) zone = 3;
+                else if(i<20) zone = 2;
+                else if(i<30) zone = 1;
+                else zone = 0;
             }
             i++;
         }
-        return 0;
+        return checkIfZoneIsPossible(zone);
+    }
+
+    /**
+     * This method checks if the chosen zone is a viable option.
+     * Meaning if there are available slots in the given zone.
+     * @param zone ZoneNumber of type integer
+     * @return Zone number of type integer.
+     */
+    private int checkIfZoneIsPossible(int zone) {
+        if(available.get(zone).isEmpty()){
+            if(zone==3){
+                zone=0;
+            }else {
+                zone++;
+            }
+            zone=checkIfZoneIsPossible(zone);
+        }
+        return zone;
     }
 
     public Slot calculateDropOffSlot(List<Slot> forbiddenSlots) {
@@ -148,6 +169,13 @@ public class Slots {
         return null;
     }
 
+    /**
+     * find slot at given location
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
     public Slot findSlot(int x, int y, int z) {
 
         y = (y - 5) / 10;
@@ -183,10 +211,20 @@ public class Slots {
      * @param slot
      */
     public void addItemToSlot(Item item, Slot slot) {
+        //add item from slot
         slot.setItem(item);
+        //add slot to item
         item.setSlotID(slot);
+        //add item to storage collection
         itemsInStorage.add(item);
+        //remove slot from available for input list
         removeFromAvailable(slot);
+        //if possible add the slot above to available for input list
+        int Xindex = ((slot.getCenterX() - 5) / 10) + (slot.getZ()+1) * xDimension;
+        if(xDimension*maxLevels>Xindex){
+            int Yindex = (slot.getCenterY() - 5) / 10;
+            addToAvailable(slotArrayYDimension.get(Yindex).get(Xindex));
+        }
     }
 
 
@@ -201,6 +239,37 @@ public class Slots {
         item.setSlotID(null);
         itemsInStorage.remove(item);
         addToAvailable(slot);
+        //if possible remove the slot above from available for input list
+        int Xindex = ((slot.getCenterX() - 5) / 10) + (slot.getZ()-1) * xDimension;
+        if(0<=Xindex){
+            int Yindex = (slot.getCenterY() - 5) / 10;
+            removeFromAvailable(slotArrayYDimension.get(Yindex).get(Xindex));
+        }
+    }
+
+    /**
+     * Method to add a slot to a correct Available Set.
+     * @param slot
+     */
+    private void addToAvailable(Slot slot) {
+        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        if(x<xDimension/4)available.get(0).add(slot);
+        else if(x<xDimension/2)available.get(1).add(slot);
+        else if (x<xDimension*3/4)available.get(2).add(slot);
+        else available.get(3).add(slot);
+    }
+
+    /**
+     * Method to remove a given slot from a correct Available Set.
+     * @param slot
+     */
+    private void removeFromAvailable(Slot slot) {
+        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        if(x<xDimension/4)available.get(0).remove(slot);
+        else if(x<xDimension/2)available.get(1).remove(slot);
+        else if (x<xDimension*3/4)available.get(2).remove(slot);
+        else available.get(3).remove(slot);
+
     }
 
     /**

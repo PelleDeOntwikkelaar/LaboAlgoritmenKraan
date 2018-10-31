@@ -65,7 +65,6 @@ public class Solution {
     }
 
     private void solveInputJob() {
-        //todo improve method
 
         // If there's only one gantry
         Gantry gantry = gantries.get(0);
@@ -75,7 +74,7 @@ public class Solution {
             int zone= slots.calculateZone(jobToSolve.getItem(), outputQueue);
 
             //calculate drop off slot
-            Slot bestFit = slots.findBestSlot(zone, gantry.getCurrentX(), gantry.getCurrentY());
+            Slot bestFit = slots.findBestSlot(zone, gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed());
 
             //update Job parameters
             jobToSolve.getPlace().setSlot(bestFit);
@@ -98,7 +97,6 @@ public class Solution {
             jobToSolve.getPickup().setSlot(slot);
 
             if (!slots.getStackedItemSlots(slot).isEmpty()) {
-                //todo: make new preceding jobs and execute them first
                 for (Slot slt : slots.getStackedItemSlots(slot)) {
                     Job job = new Job(1000, slt.getItem(), slt, null);
                     job.getPickup().setSlot(slt);
@@ -121,8 +119,8 @@ public class Solution {
 
     private void solvePrecedingJob(Job job, Gantry gantry) {
         Slot pickupSlot = job.getPickup().getSlot();
-        Slot bestFit = slots.findBestSlot(0, pickupSlot.getCenterX(), pickupSlot.getCenterY());
-        //todo: maybe a different method for best fit when it comes to preceding jobs
+        int zone=slots.calculateZone(job.getItem(),outputQueue);
+        Slot bestFit = slots.findBestSlot(zone, pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed());
         job.getPlace().setSlot(bestFit);
 
         slots.removeItemFromSlot(job.getItem(), pickupSlot);

@@ -138,9 +138,20 @@ public class Job {
         */
 
         public void calculateTime(Gantry gantry) {
-            int xDistance = Math.abs(slot.getCenterX() - gantry.getCurrentX());
+
+            int xDistance;
+            int yDistance;
+
+            if (type == TaskType.PICKUP){
+                xDistance = Math.abs(slot.getCenterX() - gantry.getCurrentX());
+                yDistance = Math.abs(slot.getCenterY() - gantry.getCurrentY());
+            } else {
+                xDistance = Math.abs(parentJob.pickup.slot.getCenterX() - gantry.getCurrentX());
+                yDistance = Math.abs(parentJob.pickup.slot.getCenterY() - gantry.getCurrentY());
+            }
+
+
             double xTime = xDistance/gantry.getXSpeed();
-            int yDistance = Math.abs(slot.getCenterY() - gantry.getCurrentY());
             double yTime = yDistance/gantry.getYSpeed();
 
             time= Math.max(xTime,yTime);

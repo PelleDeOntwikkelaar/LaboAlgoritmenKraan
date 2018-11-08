@@ -143,12 +143,14 @@ public class Solution {
         time += job.getPickup().getTime();
         //print status after pickup task
         job.printStatus(gantry, csvFileWriter,time, Job.TaskType.PICKUP);
+        time+=10;
 
         //move gantry to place slot and perform time analysis
         job.performTask(gantry, job.getPlace());
         time += job.getPlace().getTime();
         //print status after place task
         job.printStatus(gantry,csvFileWriter,time,Job.TaskType.PLACE);
+        time+=10;
 
 
     }

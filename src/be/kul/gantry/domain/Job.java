@@ -79,13 +79,26 @@ public class Job {
 
 
     public void printStatus(Gantry gantry, CSVFileWriter csvFileWriter, double totalTime,TaskType type) {
-        StringBuilder stb = new StringBuilder();
-        stb.append(gantry.printStatus(totalTime));
-        if (type == TaskType.PICKUP) stb.append(item.getId());
-        else stb.append("null");
-        stb.append(";");
-        stb.append("\n");
-        csvFileWriter.add(stb);
+        StringBuilder stb1 = new StringBuilder();
+        StringBuilder stb2 = new StringBuilder();
+        stb1.append(gantry.printStatus(totalTime));
+        stb2.append(gantry.printStatus(totalTime+10));
+
+        if (type == TaskType.PICKUP) {
+            stb1.append("null");
+            stb2.append(item.getId());
+
+        }
+        else {
+            stb1.append(item.getId());
+            stb2.append("null");
+        }
+        stb1.append(";");
+        stb2.append(";");
+        stb1.append("\n");
+        stb2.append("\n");
+        csvFileWriter.add(stb1);
+        csvFileWriter.add(stb2);
 
     }
 
@@ -125,6 +138,7 @@ public class Job {
         public double getTime() {
             return time;
         }
+
         /*
         public StringBuilder getOutput(double totalTime) {
             StringBuilder stb = new StringBuilder();
@@ -146,8 +160,8 @@ public class Job {
                 xDistance = Math.abs(slot.getCenterX() - gantry.getCurrentX());
                 yDistance = Math.abs(slot.getCenterY() - gantry.getCurrentY());
             } else {
-                xDistance = Math.abs(parentJob.pickup.slot.getCenterX() - gantry.getCurrentX());
-                yDistance = Math.abs(parentJob.pickup.slot.getCenterY() - gantry.getCurrentY());
+                xDistance = Math.abs(parentJob.place.slot.getCenterX() - gantry.getCurrentX());
+                yDistance = Math.abs(parentJob.place.slot.getCenterY() - gantry.getCurrentY());
             }
 
 

@@ -107,20 +107,19 @@ public class Slots {
      * @return
      */
     public Slot findBestSlot(int zone, int currentX, int currentY, double xSpeed, double ySpeed, int forbiddenX, int forbiddenY) {
-        int yArray=(currentY-5)/10;
-        boolean doorgaan=true;
-        while(doorgaan){
+        //while loop is necessary, Y dimension can be full.
+        int yArray = (currentY-5)/10;
+        while(true){
             for (Slot slot : slotArrayYDimension.get(yArray)) {
-                if (slot.getItem() == null && slot.getCenterX()!=forbiddenX && slot.getCenterY()!=forbiddenY){
-                    doorgaan=false;
+                //when an item is moved out of relocation purposes, the slot above may never be the destination slot
+                if (slot.getItem() == null && slot.getCenterX() != forbiddenX && slot.getCenterY() != forbiddenY){
                     return slot;
                 }
             }
-            if(yArray==yDimension-1) yArray=0;
+            if(yArray == yDimension-1) yArray = 0;
             else yArray++;
         }
 
-        return null;
 
         /*Slot destinationSlot = null;
         double timeNeeded = Math.max(xDimension * xSpeed, yDimension * ySpeed);

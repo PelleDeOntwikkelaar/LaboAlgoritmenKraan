@@ -46,27 +46,6 @@ public class Job {
         return time;
     }
 
-    /*
-    public void calculateTime(Gantry gantry){
-        pickup.calculateTime(gantry);
-        place.calculateTime(gantry);
-        time = pickup.getTime() + place.getTime();
-
-        System.out.println("pickup: " + pickup.getTime() + ", place: " + place.getTime() + ", time: " + time);
-    }
-
-    public StringBuilder getOutput(Gantry gantry, double totalTime) {
-        StringBuilder stb = new StringBuilder();
-
-        stb.append(pickup.getOutput(gantry, totalTime));
-        stb.append("\n");
-        stb.append(place.getOutput(gantry, totalTime + pickup.getTime()));
-        stb.append("\n");
-
-        return stb;
-    }
-    */
-
     @Override
     public String toString() {
         return String.format("J%d move %d from %s to %s in %f",id,item.getId(),pickup.slot,place.slot,time);
@@ -139,17 +118,6 @@ public class Job {
             return time;
         }
 
-        /*
-        public StringBuilder getOutput(double totalTime) {
-            StringBuilder stb = new StringBuilder();
-
-            if (type == TaskType.PICKUP) stb.append(parentJob.getItem().getId());
-            else stb.append("null");
-            stb.append(";");
-
-            return stb;
-        }
-        */
 
         public void calculateTime(Gantry gantry) {
 

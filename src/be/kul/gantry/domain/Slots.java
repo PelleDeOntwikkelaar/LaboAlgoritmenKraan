@@ -106,7 +106,9 @@ public class Slots {
      * @param ySpeed
      * @return
      */
-    public Slot findBestSlot(int zone, int currentX, int currentY, double xSpeed, double ySpeed, int forbiddenX, int forbiddenY) {
+    public Slot findBestSlot(int zone, int currentX, int currentY,
+                             double xSpeed, double ySpeed, int forbiddenX, int forbiddenY) {
+        /*
         //while loop is necessary, Y dimension can be full.
         int yArray = (currentY-5)/10;
         while(true){
@@ -119,22 +121,23 @@ public class Slots {
             if(yArray == yDimension-1) yArray = 0;
             else yArray++;
         }
+        */
 
 
-        /*Slot destinationSlot = null;
-        double timeNeeded = Math.max(xDimension * xSpeed, yDimension * ySpeed);
+        Slot destinationSlot = null;
+        double timeNeeded = Math.max(xDimension*10 / xSpeed, yDimension*10 / ySpeed);
 
         for (Slot slot : available.get(zone)) {
             int x = Math.abs(currentX - slot.getCenterX());
             int y = Math.abs(currentY - slot.getCenterY());
-            double time = Math.max(x * xSpeed, y * ySpeed);
-            if (time < timeNeeded) {
+            double time = Math.max(x / xSpeed, y / ySpeed);
+            if (time < timeNeeded && slot.getCenterX()!=forbiddenX &&slot.getCenterY()!=forbiddenY) {
                 timeNeeded = time;
                 destinationSlot = slot;
             }
 
         }
-        return destinationSlot;*/
+        return destinationSlot;
     }
 
     /**
@@ -176,14 +179,6 @@ public class Slots {
             zone = checkIfZoneIsPossible(zone);
         }
         return zone;
-    }
-
-    public Slot calculateDropOffSlot(List<Slot> forbiddenSlots) {
-        //todo: implement method
-        if (forbiddenSlots != null) {
-
-        }
-        return null;
     }
 
     /**
@@ -271,7 +266,7 @@ public class Slots {
      * @param slot
      */
     private void addToAvailable(Slot slot) {
-        int x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        int x = ((slot.getCenterX() - 5) / 10);
         if (x < xDimension / 4) available.get(0).add(slot);
         else if (x < xDimension / 2) available.get(1).add(slot);
         else if (x < xDimension * 3 / 4) available.get(2).add(slot);
@@ -284,7 +279,7 @@ public class Slots {
      * @param slot
      */
     private void removeFromAvailable(Slot slot) {
-        int x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        int x = ((slot.getCenterX() - 5) / 10);
         if (x < xDimension / 4) available.get(0).remove(slot);
         else if (x < xDimension / 2) available.get(1).remove(slot);
         else if (x < xDimension * 3 / 4) available.get(2).remove(slot);

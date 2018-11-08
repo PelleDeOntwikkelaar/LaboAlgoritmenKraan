@@ -108,6 +108,40 @@ public class Job {
         public StringBuilder getOutput(Gantry gantry, double totalTime) {
             StringBuilder stb = new StringBuilder();
 
+            stb.append(getMoveOutput(gantry, totalTime));
+            stb.append("\n");
+            stb.append(getActionOutput(gantry, totalTime));
+
+            return stb;
+        }
+
+        public StringBuilder getMoveOutput(Gantry gantry, double totalTime){
+            StringBuilder stb = new StringBuilder();
+
+            stb.append(gantry.getId());
+            stb.append(";");
+
+            stb.append(time + totalTime);
+            stb.append(";");
+
+            gantry.setCurrentX(slot.getCenterX());
+            stb.append(slot.getCenterX());
+            stb.append(";");
+
+            gantry.setCurrentY(slot.getCenterY());
+            stb.append(slot.getCenterY());
+            stb.append(";");
+
+            if (type == TaskType.PLACE) stb.append(parentJob.getItem().getId());
+            else stb.append("null");
+            stb.append(";");
+
+            return stb;
+        }
+
+        public StringBuilder getActionOutput(Gantry gantry, double totalTime){
+            StringBuilder stb = new StringBuilder();
+
             stb.append(gantry.getId());
             stb.append(";");
 

@@ -41,7 +41,7 @@ public class Slots {
         this.maxLevels = maxLevels;
         this.slotArrayYDimension = new ArrayList<>();
         this.available = new ArrayList<Set<Slot>>();
-        for (int i=0;i<4;i++){
+        for (int i = 0; i < 4; i++) {
             available.add(new HashSet<Slot>());
         }
         this.itemsInStorage = new ArrayList<>();
@@ -97,6 +97,7 @@ public class Slots {
 
     /**
      * Find slot to store item, with logic.
+     *
      * @param zone
      * @param currentX
      * @param currentY
@@ -106,36 +107,42 @@ public class Slots {
      */
     public Slot findBestSlot(int zone, int currentX, int currentY, double xSpeed, double ySpeed) {
 
-        Slot destinationSlot =null;
-        double timeNeeded = Math.max(xDimension*xSpeed,yDimension*ySpeed);
+        for (Slot slot : slotArrayYDimension.get((currentY-5)/10)) {
+            if (slot.getItem() == null) return slot;
+        }
+        return null;
 
-        for(Slot slot : available.get(zone)){
-            int x = Math.abs(currentX-slot.getCenterX());
-            int y = Math.abs(currentY-slot.getCenterY());
-            double time=Math.max(x*xSpeed,y*ySpeed);
-            if(time<timeNeeded){
-                timeNeeded=time;
-                destinationSlot=slot;
+        /*Slot destinationSlot = null;
+        double timeNeeded = Math.max(xDimension * xSpeed, yDimension * ySpeed);
+
+        for (Slot slot : available.get(zone)) {
+            int x = Math.abs(currentX - slot.getCenterX());
+            int y = Math.abs(currentY - slot.getCenterY());
+            double time = Math.max(x * xSpeed, y * ySpeed);
+            if (time < timeNeeded) {
+                timeNeeded = time;
+                destinationSlot = slot;
             }
 
         }
-        return destinationSlot;
+        return destinationSlot;*/
     }
 
     /**
      * Method to calculate the perfect drop off zone for a given item.
+     *
      * @param item
      * @param outputQueue
      * @return
      */
-    public int calculateZone(Item item, Queue<Job> outputQueue){
-        int i=0;
-        int zone=0;
-        for(Job job : outputQueue){
-            if(job.getItem().getId()==item.getId()){
-                if(i<10) zone = 3;
-                else if(i<20) zone = 2;
-                else if(i<30) zone = 1;
+    public int calculateZone(Item item, Queue<Job> outputQueue) {
+        int i = 0;
+        int zone = 0;
+        for (Job job : outputQueue) {
+            if (job.getItem().getId() == item.getId()) {
+                if (i < 10) zone = 3;
+                else if (i < 20) zone = 2;
+                else if (i < 30) zone = 1;
                 else zone = 0;
             }
             i++;
@@ -146,17 +153,18 @@ public class Slots {
     /**
      * This method checks if the chosen zone is a viable option.
      * Meaning if there are available slots in the given zone.
+     *
      * @param zone ZoneNumber of type integer
      * @return Zone number of type integer.
      */
     private int checkIfZoneIsPossible(int zone) {
-        if(available.get(zone).isEmpty()){
-            if(zone==3){
-                zone=0;
-            }else {
+        if (available.get(zone).isEmpty()) {
+            if (zone == 3) {
+                zone = 0;
+            } else {
                 zone++;
             }
-            zone=checkIfZoneIsPossible(zone);
+            zone = checkIfZoneIsPossible(zone);
         }
         return zone;
     }
@@ -171,6 +179,7 @@ public class Slots {
 
     /**
      * find slot at given location
+     *
      * @param x
      * @param y
      * @param z
@@ -220,10 +229,10 @@ public class Slots {
         //remove slot from available for input list
         removeFromAvailable(slot);
         //if possible add the slot above to available for input list
-        int Xindex = ((slot.getCenterX() - 5) / 10) + (slot.getZ()+1) * xDimension;
-        if(xDimension*maxLevels>Xindex){
-            int Yindex = (slot.getCenterY() - 5) / 10;
-            addToAvailable(slotArrayYDimension.get(Yindex).get(Xindex));
+        int xIndex = ((slot.getCenterX() - 5) / 10) + (slot.getZ() + 1) * xDimension;
+        if (xDimension * maxLevels > xIndex) {
+            int yIndex = (slot.getCenterY() - 5) / 10;
+            addToAvailable(slotArrayYDimension.get(yIndex).get(xIndex));
         }
     }
 
@@ -240,8 +249,8 @@ public class Slots {
         itemsInStorage.remove(item);
         addToAvailable(slot);
         //if possible remove the slot above from available for input list
-        int Xindex = ((slot.getCenterX() - 5) / 10) + (slot.getZ()-1) * xDimension;
-        if(0<=Xindex){
+        int Xindex = ((slot.getCenterX() - 5) / 10) + (slot.getZ() - 1) * xDimension;
+        if (0 <= Xindex) {
             int Yindex = (slot.getCenterY() - 5) / 10;
             removeFromAvailable(slotArrayYDimension.get(Yindex).get(Xindex));
         }
@@ -249,25 +258,27 @@ public class Slots {
 
     /**
      * Method to add a slot to a correct Available Set.
+     *
      * @param slot
      */
     private void addToAvailable(Slot slot) {
-        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
-        if(x<xDimension/4)available.get(0).add(slot);
-        else if(x<xDimension/2)available.get(1).add(slot);
-        else if (x<xDimension*3/4)available.get(2).add(slot);
+        int x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        if (x < xDimension / 4) available.get(0).add(slot);
+        else if (x < xDimension / 2) available.get(1).add(slot);
+        else if (x < xDimension * 3 / 4) available.get(2).add(slot);
         else available.get(3).add(slot);
     }
 
     /**
      * Method to remove a given slot from a correct Available Set.
+     *
      * @param slot
      */
     private void removeFromAvailable(Slot slot) {
-        int x=((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
-        if(x<xDimension/4)available.get(0).remove(slot);
-        else if(x<xDimension/2)available.get(1).remove(slot);
-        else if (x<xDimension*3/4)available.get(2).remove(slot);
+        int x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+        if (x < xDimension / 4) available.get(0).remove(slot);
+        else if (x < xDimension / 2) available.get(1).remove(slot);
+        else if (x < xDimension * 3 / 4) available.get(2).remove(slot);
         else available.get(3).remove(slot);
 
     }
@@ -278,7 +289,7 @@ public class Slots {
      * @param slot
      * @return A list containing all slots where an items needs to be moved first
      */
-    public LinkedList<Slot> getStackedItemSlots(Slot slot) {
+    public List<Slot> getStackedItemSlots(Slot slot) {
         // the list we'll return
         LinkedList<Slot> list = new LinkedList<>();
 

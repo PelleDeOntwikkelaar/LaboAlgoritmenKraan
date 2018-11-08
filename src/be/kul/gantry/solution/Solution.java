@@ -26,7 +26,6 @@ public class Solution {
     private double time;
 
 
-
     public Solution(Problem problem, CSVFileWriter csvFileWriter) {
         this.csvFileWriter = csvFileWriter;
         this.problem = problem;
@@ -51,7 +50,7 @@ public class Solution {
 
     public void solveNextJob() {
 
-        if (!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) {
+        if ((!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) || outputQueue.isEmpty()) {
             // if the item we want to extract isn't in storage we'll do an input job
             if (!inputQueue.isEmpty()) {
                 jobToSolve = inputQueue.poll();

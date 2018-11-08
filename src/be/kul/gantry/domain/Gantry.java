@@ -91,4 +91,28 @@ public class Gantry {
     public boolean canReachSlot(Slot s) {
         return xMin <= s.getCenterX() && s.getCenterX() <= xMax;
     }
+
+    public void moveCrane(int centerX, int centerY) {
+        currentX=centerX;
+        currentY=centerY;
+    }
+
+    public String printStatus(double totalTime){
+        StringBuilder stb = new StringBuilder();
+
+        stb.append(id);
+        stb.append(";");
+
+        stb.append(totalTime);
+        stb.append(";");
+
+        stb.append(currentX);
+        stb.append(";");
+
+        stb.append(currentY);
+        stb.append(";");
+
+        return stb.toString();
+
+    }
 }

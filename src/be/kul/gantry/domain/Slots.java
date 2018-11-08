@@ -68,7 +68,7 @@ public class Slots {
             wanneer we te maken hebben met een opslag slot, moet deze op de juiste manier worden aangemaakt en ingpast
             worden.
             */
-        for (Slot slot : slots)
+        for (Slot slot : slots) {
             if (slot.isStorageSlot()) {
                 int y = (slot.getCenterY() - 5) / 10;
                 int x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
@@ -93,6 +93,7 @@ public class Slots {
             } else {
                 outputSlot = slot;
             }
+        }
     }
 
     /**

@@ -129,11 +129,28 @@ public class Solution {
         System.out.println(job.toString());
     }
 
+    /**
+     * Method that performs a job excecution in two different steps.
+     * 1) Time calculation for crane movement and print crane movement.
+     * 2) Time calculation of pickup/delivery and dor it and print specifics
+     * @param job Type Job: Job to complete in this method.
+     * @param gantry Type Gantry: Crane that will perform the given job.
+     */
     public void executeJob(Job job, Gantry gantry) {
-        //todo tijd deftig berekenen en kijken of positie kraan juist naar de output geschreven wordt
-        job.calculateTime(gantry);
-        csvFileWriter.add(job.getOutput(gantry, time));
-        time += job.getTime();
+
+        //move gantry to pickup slot and perform time analysis
+        job.performTask(gantry,job.getPickup());
+        time += job.getPickup().getTime();
+        //print status after pickup task
+        job.printStatus(gantry, csvFileWriter,time, Job.TaskType.PICKUP);
+
+        //move gantry to place slot and perform time analysis
+        job.performTask(gantry, job.getPlace());
+        time += job.getPlace().getTime();
+        //print status after place task
+        job.printStatus(gantry,csvFileWriter,time,Job.TaskType.PLACE);
+
+
     }
 
     public void solve() {

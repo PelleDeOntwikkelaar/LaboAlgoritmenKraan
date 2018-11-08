@@ -1,5 +1,7 @@
 package be.kul.gantry.domain;
 
+import be.kul.gantry.Extra.CSVFileWriter;
+
 /**
  * Created by Wim on 12/05/2015.
  */
@@ -44,6 +46,7 @@ public class Job {
         return time;
     }
 
+    /*
     public void calculateTime(Gantry gantry){
         pickup.calculateTime(gantry);
         place.calculateTime(gantry);
@@ -62,10 +65,28 @@ public class Job {
 
         return stb;
     }
+    */
 
     @Override
     public String toString() {
         return String.format("J%d move %d from %s to %s in %f",id,item.getId(),pickup.slot,place.slot,time);
+    }
+
+    public void performTask(Gantry gantry, Task task) {
+        task.calculateTime(gantry);
+        gantry.moveCrane(task.slot.getCenterX(), task.slot.getCenterY());
+    }
+
+
+    public void printStatus(Gantry gantry, CSVFileWriter csvFileWriter, double totalTime,TaskType type) {
+        StringBuilder stb = new StringBuilder();
+        stb.append(gantry.printStatus(totalTime));
+        if (type == TaskType.PICKUP) stb.append(item.getId());
+        else stb.append("null");
+        stb.append(";");
+        stb.append("\n");
+        csvFileWriter.add(stb);
+
     }
 
     public class Task {
@@ -104,57 +125,9 @@ public class Job {
         public double getTime() {
             return time;
         }
-
-        public StringBuilder getOutput(Gantry gantry, double totalTime) {
+        /*
+        public StringBuilder getOutput(double totalTime) {
             StringBuilder stb = new StringBuilder();
-
-            stb.append(getMoveOutput(gantry, totalTime));
-            stb.append("\n");
-            stb.append(getActionOutput(gantry, totalTime));
-
-            return stb;
-        }
-
-        public StringBuilder getMoveOutput(Gantry gantry, double totalTime){
-            StringBuilder stb = new StringBuilder();
-
-            stb.append(gantry.getId());
-            stb.append(";");
-
-            stb.append(time + totalTime);
-            stb.append(";");
-
-            gantry.setCurrentX(slot.getCenterX());
-            stb.append(slot.getCenterX());
-            stb.append(";");
-
-            gantry.setCurrentY(slot.getCenterY());
-            stb.append(slot.getCenterY());
-            stb.append(";");
-
-            if (type == TaskType.PLACE) stb.append(parentJob.getItem().getId());
-            else stb.append("null");
-            stb.append(";");
-
-            return stb;
-        }
-
-        public StringBuilder getActionOutput(Gantry gantry, double totalTime){
-            StringBuilder stb = new StringBuilder();
-
-            stb.append(gantry.getId());
-            stb.append(";");
-
-            stb.append(time + totalTime);
-            stb.append(";");
-
-            gantry.setCurrentX(slot.getCenterX());
-            stb.append(slot.getCenterX());
-            stb.append(";");
-
-            gantry.setCurrentY(slot.getCenterY());
-            stb.append(slot.getCenterY());
-            stb.append(";");
 
             if (type == TaskType.PICKUP) stb.append(parentJob.getItem().getId());
             else stb.append("null");
@@ -162,6 +135,7 @@ public class Job {
 
             return stb;
         }
+        */
 
         public void calculateTime(Gantry gantry) {
             int xDistance = Math.abs(slot.getCenterX() - gantry.getCurrentX());
@@ -169,8 +143,7 @@ public class Job {
             int yDistance = Math.abs(slot.getCenterY() - gantry.getCurrentY());
             double yTime = yDistance/gantry.getYSpeed();
 
-            if (xTime >= yTime) time = xTime;
-            else time = yTime;
+            time= Math.max(xTime,yTime);
 
             System.out.println("x: " + xTime + ", y: " + yTime + ", time: " + time);
         }

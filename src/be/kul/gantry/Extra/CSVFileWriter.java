@@ -36,6 +36,7 @@ public class CSVFileWriter {
             fileWriter.append(stringBuilder.toString());
 
             fileWriter.flush();
+            System.out.println("Succesfully flushed");
 
         } catch (IOException e) {
             e.printStackTrace();

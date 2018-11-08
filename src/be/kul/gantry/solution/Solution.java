@@ -24,6 +24,7 @@ public class Solution {
     private List<Gantry> gantries;
 
     private double time;
+    private int jobNumber;
 
 
     public Solution(Problem problem, CSVFileWriter csvFileWriter) {
@@ -46,6 +47,8 @@ public class Solution {
         slots.addSlots(problem.getSlots());
         gantries = problem.getGantries();
         time = 0;
+
+        jobNumber=((LinkedList<Job>) outputQueue).peekLast().getId()+1000;
     }
 
     public void solveNextJob() {
@@ -73,7 +76,7 @@ public class Solution {
             int zone= slots.calculateZone(jobToSolve.getItem(), outputQueue);
 
             //calculate drop off slot
-            Slot bestFit = slots.findBestSlot(zone, gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed());
+            Slot bestFit = slots.findBestSlot(zone, gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(),-1,-1);
 
             //update Job parameters
             jobToSolve.getPlace().setSlot(bestFit);
@@ -97,7 +100,7 @@ public class Solution {
 
             if (!slots.getStackedItemSlots(slot).isEmpty()) {
                 for (Slot slt : slots.getStackedItemSlots(slot)) {
-                    Job job = new Job(1000, slt.getItem(), slt, null);
+                    Job job = new Job(jobNumber++, slt.getItem(), slt, null);
                     job.getPickup().setSlot(slt);
                     precedingJobs.addFirst(job);
                 }
@@ -107,6 +110,7 @@ public class Solution {
                 }
                 precedingJobs.clear();
             }
+
             slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
         }
 
@@ -119,13 +123,13 @@ public class Solution {
     private void solvePrecedingJob(Job job, Gantry gantry) {
         Slot pickupSlot = job.getPickup().getSlot();
         int zone=slots.calculateZone(job.getItem(),outputQueue);
-        Slot bestFit = slots.findBestSlot(zone, pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed());
+        Slot bestFit = slots.findBestSlot(zone, pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed(),pickupSlot.getCenterX(),pickupSlot.getCenterY());
         job.getPlace().setSlot(bestFit);
 
         slots.removeItemFromSlot(job.getItem(), pickupSlot);
         slots.addItemToSlot(job.getItem(), bestFit);
 
-        executeJob(jobToSolve, gantry);
+        executeJob(job, gantry);
         System.out.println(job.toString());
     }
 

@@ -106,11 +106,20 @@ public class Slots {
      * @param ySpeed
      * @return
      */
-    public Slot findBestSlot(int zone, int currentX, int currentY, double xSpeed, double ySpeed) {
-
-        for (Slot slot : slotArrayYDimension.get((currentY-5)/10)) {
-            if (slot.getItem() == null) return slot;
+    public Slot findBestSlot(int zone, int currentX, int currentY, double xSpeed, double ySpeed, int forbiddenX, int forbiddenY) {
+        int yArray=(currentY-5)/10;
+        boolean doorgaan=true;
+        while(doorgaan){
+            for (Slot slot : slotArrayYDimension.get(yArray)) {
+                if (slot.getItem() == null && slot.getCenterX()!=forbiddenX && slot.getCenterY()!=forbiddenY){
+                    doorgaan=false;
+                    return slot;
+                }
+            }
+            if(yArray==yDimension-1) yArray=0;
+            else yArray++;
         }
+
         return null;
 
         /*Slot destinationSlot = null;

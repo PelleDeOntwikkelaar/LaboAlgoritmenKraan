@@ -189,6 +189,17 @@ public class Slots {
      * @return A list containing all slots where an items needs to be moved first
      */
     public List<Slot> getStackedItemSlots(Slot slot) {
+
+        LinkedList<Slot> list = (LinkedList<Slot>) getStackedSlots(slot);
+
+        for (Slot slt:list) {
+            if (slt.getItem() == null) list.remove(slt);
+        }
+
+        return list;
+    }
+
+    public List<Slot> getStackedSlots(Slot slot){
         // the list we'll return
         LinkedList<Slot> list = new LinkedList<>();
 
@@ -203,8 +214,7 @@ public class Slots {
             for (int i = slot.getZ() + 1; i < maxLevels; i++) {
                 // checking all slots above current slot for items
                 Slot slt = slotArrayYDimension.get(row).get((slot.getXMin() / 10) + (i * baseSize));
-                if (slt.getItem() != null) list.add(slt);
-                else return list;
+                list.add(slt);
             }
             return list;
 
@@ -224,14 +234,13 @@ public class Slots {
 
                     Slot slt = slotArrayYDimension.get(row).get(index + (i * baseSize) - z + j - correction);
                     if (checkShiftedLevel(findShiftedX(slt), baseSize) == i){
-                        if (slt.getItem() != null) list.add(slt);
+                        list.add(slt);
                         System.out.println(index + (i * baseSize) - z + j - correction);
                     }
                 }
             }
             return list;
         }
-
     }
 
     /**

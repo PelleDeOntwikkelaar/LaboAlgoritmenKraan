@@ -220,6 +220,8 @@ public class Slots {
                     int index = findShiftedX(slot);
                     int correction = (z - 1)*2;
 
+                    if (index + (i * baseSize) - z + j - correction >= slotArrayYDimension.get(row).size()) break;
+
                     Slot slt = slotArrayYDimension.get(row).get(index + (i * baseSize) - z + j - correction);
                     if (checkShiftedLevel(findShiftedX(slt), baseSize) == i){
                         if (slt.getItem() != null) list.add(slt);

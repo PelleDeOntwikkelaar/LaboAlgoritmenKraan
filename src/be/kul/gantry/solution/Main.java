@@ -14,7 +14,8 @@ public class Main {
     public static void main(String[] args) {
 
         Scanner sc = new Scanner(System.in);
-        int choice = 0;
+        int choice;
+        boolean shifted;
 
         System.out.println("Choose your input file:");
         System.out.println("    1. One gantry, stacked rows");
@@ -27,8 +28,13 @@ public class Main {
         File oneGantryTrueFile = new File("1_10_100_4_TRUE_65_50_50.json");
         // File twoGantryTrueFile = new File("1_10_100_4_FALSE_65_50_50.json");
 
-        if (choice == 1) inputFile = oneGantryFalseFile;
-        else if (choice == 2) inputFile = oneGantryTrueFile;
+        if (choice == 1) {
+            inputFile = oneGantryFalseFile;
+            shifted = false;
+        } else if (choice == 2) {
+            inputFile = oneGantryTrueFile;
+            shifted = true;
+        }
         else return;
 
         Problem problem;
@@ -36,7 +42,7 @@ public class Main {
         CSVFileWriter csvFileWriter = new CSVFileWriter();
         try {
             problem = Problem.fromJson(inputFile);
-            solution = new Solution(problem,csvFileWriter);
+            solution = new Solution(problem,csvFileWriter, shifted);
             solution.solve();
         } catch (Exception e) {
             e.printStackTrace();

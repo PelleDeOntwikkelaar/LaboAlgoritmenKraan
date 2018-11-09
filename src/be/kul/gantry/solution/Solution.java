@@ -27,15 +27,15 @@ public class Solution {
     private int jobNumber;
 
 
-    public Solution(Problem problem, CSVFileWriter csvFileWriter) {
+    public Solution(Problem problem, CSVFileWriter csvFileWriter, boolean shifted) {
         this.csvFileWriter = csvFileWriter;
         this.problem = problem;
-        initializeParameters();
+        initializeParameters(shifted);
     }
 
-    private void initializeParameters() {
+    private void initializeParameters(boolean shifted) {
         //Slots object is initialized with correct parameters.
-        slots = new Slots(problem.getItems(), problem.getMaxX(), problem.getMaxY(), problem.getMaxLevels(), false);
+        slots = new Slots(problem.getItems(), problem.getMaxX(), problem.getMaxY(), problem.getMaxLevels(), shifted);
         //queues are provided
         precedingJobs = new LinkedList<>();
         inputQueue = new LinkedList<>();

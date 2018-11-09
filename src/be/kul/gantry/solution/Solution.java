@@ -5,6 +5,9 @@ import be.kul.gantry.domain.*;
 
 import java.util.*;
 
+/**
+ * @author pellereyniers & boriswauters
+ */
 public class Solution {
 
     private Problem problem;
@@ -79,7 +82,7 @@ public class Solution {
         }
 
         executeJob(jobToSolve, gantry);
-        System.out.println(jobToSolve);
+        System.out.println(jobToSolve+ "time: " +time);
 
         jobToSolve = null;
     }
@@ -92,9 +95,9 @@ public class Solution {
         if (jobToSolve.getPickup().getSlot() == null) {
             Slot slot = slots.findSlotByItem(jobToSolve.getItem());
             jobToSolve.getPickup().setSlot(slot);
-
-            if (!slots.getStackedItemSlots(slot).isEmpty()) {
-                for (Slot slt : slots.getStackedItemSlots(slot)) {
+            List<Slot> stackedItems = slots.getStackedItemSlots(slot);
+            if (!stackedItems.isEmpty()) {
+                for (Slot slt :stackedItems) {
                     Job job = new Job(jobNumber++, slt.getItem(), slt, null);
                     job.getPickup().setSlot(slt);
                     precedingJobs.addFirst(job);
@@ -110,7 +113,7 @@ public class Solution {
         }
 
         executeJob(jobToSolve, gantry);
-        System.out.println(jobToSolve);
+        System.out.println(jobToSolve + "time: " +time);
 
         jobToSolve = null;
     }
@@ -132,7 +135,7 @@ public class Solution {
         slots.addItemToSlot(job.getItem(), bestFit);
 
         executeJob(job, gantry);
-        System.out.println(job.toString());
+        System.out.println(job.toString()+ "time: " +time);
     }
 
     /**

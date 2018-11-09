@@ -209,10 +209,45 @@ public class Slots {
             return list;
 
         } else {
-            //todo shifted rows
-            return null;
+            baseSize = slotArrayYDimension.get(0).size() / maxLevels;
+
+            int z = slot.getZ() + 1;
+
+            for (int i = z; i < maxLevels; i++) {
+                // checking all slots above current slot for items
+                for (int j = 0; j < i - z + 2; j++) {
+
+                    int index = findShiftedX(slot);
+                    int correction = (z - 1)*2;
+
+                    Slot slt = slotArrayYDimension.get(row).get(index + (i * baseSize) - z + j - correction);
+                    if (checkShiftedLevel(findShiftedX(slt), baseSize) == i){
+                        if (slt.getItem() != null) list.add(slt);
+                        System.out.println(index + (i * baseSize) - z + j - correction);
+                    }
+                }
+            }
+            return list;
         }
 
+    }
+
+    /**
+     * Checks the z of a certain index
+     * @param index
+     * @param baseLevel
+     * @return level of the slot with given index
+     */
+    public int checkShiftedLevel(int index, int baseLevel){
+        int level = 0;
+        while (index > 0) {
+            index =- baseLevel;
+            if (index >= 0){
+                baseLevel--;
+                level++;
+            }
+        }
+        return level;
     }
 
 }

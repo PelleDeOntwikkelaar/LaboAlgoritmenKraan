@@ -138,7 +138,7 @@ public class Job {
 
             time= Math.max(xTime,yTime);
 
-            System.out.println("x: " + xTime + ", y: " + yTime + ", time: " + time);
+            // System.out.println("x: " + xTime + ", y: " + yTime + ", time: " + time);
         }
 
         @Override

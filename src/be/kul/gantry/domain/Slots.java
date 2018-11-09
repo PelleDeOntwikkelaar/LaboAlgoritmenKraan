@@ -57,7 +57,7 @@ public class Slots {
                 int y = (slot.getCenterY() - 5) / 10;
                 int x;
 
-                if(!shifted) x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
+                if (!shifted) x = ((slot.getCenterX() - 5) / 10) + slot.getZ() * xDimension;
                 else x = findShiftedX(slot);
 
                 slotArrayYDimension.get(y).add(x, slot);
@@ -77,15 +77,15 @@ public class Slots {
         }
     }
 
-    private int findShiftedX(Slot slot){
-        int z=slot.getZ();
-        int offset=0;
-        for(int i=1;i<=z;i++){
-            offset+=xDimension-(i-1);
+    private int findShiftedX(Slot slot) {
+        int z = slot.getZ();
+        int offset = 0;
+        for (int i = 1; i <= z; i++) {
+            offset += xDimension - (i - 1);
         }
-        int base=(slot.getCenterX() - 5*(z+1)) / 10;
+        int base = (slot.getCenterX() - 5 * (z + 1)) / 10;
 
-        return base+offset;
+        return base + offset;
     }
 
     /**
@@ -99,18 +99,18 @@ public class Slots {
      */
     public Slot findBestSlot(int currentX, int currentY, double xSpeed, double ySpeed, Set<Slot> forbiddenSlots) {
         //while loop is necessary, Y dimension can be full.
-        int yArray = (currentY-5)/10;
-        while(true){
+        int yArray = (currentY - 5) / 10;
+        while (true) {
             for (Slot slot : slotArrayYDimension.get(yArray)) {
                 //when an item is moved out of relocation purposes, the slot above may never be the destination slot
-                if (slot.getItem() == null ){
-                    if((forbiddenSlots==null)||( forbiddenSlots!=null &&!forbiddenSlots.contains(slot))){
+                if (slot.getItem() == null) {
+                    if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
                         return slot;
                     }
 
                 }
             }
-            if(yArray == yDimension-1) yArray = 0;
+            if (yArray == yDimension - 1) yArray = 0;
             else yArray++;
         }
     }
@@ -164,22 +164,13 @@ public class Slots {
 
     }
 
-    public Set<Slot> findForbiddenSlots(Slot slotPrecedingPickUp,Slot slotToSolvePickUp){
-        Set<Slot> forbiddenSlots= null;
+    public Set<Slot> findForbiddenSlots(Slot slotToSolvePickUp) {
+        Set<Slot> forbiddenSlots;
 
-        if (!shifted){
-            forbiddenSlots= new HashSet<>();
-            int yIndex = (slotPrecedingPickUp.getCenterY()-5)/10;
-            for(Slot slot: slotArrayYDimension.get(yIndex)){
-                if(slot.getCenterX()==slotPrecedingPickUp.getCenterX()){
-                    forbiddenSlots.add(slot);
-                }
-            }
-        }else {
-            List<Slot> slots = getStackedSlots(slotToSolvePickUp);
-            forbiddenSlots =new HashSet<>();
-            forbiddenSlots.addAll(slots);
-        }
+        List<Slot> slots = getStackedSlots(slotToSolvePickUp);
+        forbiddenSlots = new HashSet<>();
+        forbiddenSlots.addAll(slots);
+
 
         return forbiddenSlots;
     }
@@ -194,14 +185,20 @@ public class Slots {
 
         LinkedList<Slot> list = (LinkedList<Slot>) getStackedSlots(slot);
 
-        for (Slot slt:list) {
-            if (slt.getItem() == null) list.remove(slt);
+        HashSet<Slot> toRemove = new HashSet<>();
+
+        for (Slot slt : list) {
+            if (slt.getItem() == null) toRemove.add(slt);
+        }
+
+        for (Slot slt : toRemove) {
+            list.remove(slt);
         }
 
         return list;
     }
 
-    public List<Slot> getStackedSlots(Slot slot){
+    public List<Slot> getStackedSlots(Slot slot) {
         // the list we'll return
         LinkedList<Slot> list = new LinkedList<>();
 
@@ -227,15 +224,19 @@ public class Slots {
 
             for (int i = z; i < maxLevels; i++) {
                 // checking all slots above current slot for items
+                System.out.println("checking i: " + i);
                 for (int j = 0; j < i - z + 2; j++) {
 
                     int index = findShiftedX(slot);
-                    int correction = (z - 1)*2;
+                    int correction = (z - 1) * 2;
 
                     if (index + (i * baseSize) - z + j - correction >= slotArrayYDimension.get(row).size()) break;
 
                     Slot slt = slotArrayYDimension.get(row).get(index + (i * baseSize) - z + j - correction);
-                    if (checkShiftedLevel(findShiftedX(slt), baseSize) == i){
+
+                    System.out.println("    checkLevel: " + checkShiftedLevel(findShiftedX(slt), baseSize));
+
+                    if (checkShiftedLevel(findShiftedX(slt), baseSize) == i) {
                         list.add(slt);
                         System.out.println(index + (i * baseSize) - z + j - correction);
                     }
@@ -247,15 +248,16 @@ public class Slots {
 
     /**
      * Checks the z of a certain index
+     *
      * @param index
      * @param baseLevel
      * @return level of the slot with given index
      */
-    public int checkShiftedLevel(int index, int baseLevel){
+    public int checkShiftedLevel(int index, int baseLevel) {
         int level = 0;
         while (index > 0) {
-            index =- baseLevel;
-            if (index >= 0){
+            index -= baseLevel;
+            if (index >= 0) {
                 baseLevel--;
                 level++;
             }

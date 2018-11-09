@@ -22,8 +22,8 @@ public class Main {
         boolean shifted;
 
         System.out.println("Choose your input file:");
-        System.out.println("    1. One gantry, stacked rows");
-        System.out.println("    2. One gantry, shifted rows");
+        System.out.println("    1. input file: " + inputFileName1);
+        System.out.println("    2. input file: " + inputFileName2);
 
         choice = sc.nextInt();
 

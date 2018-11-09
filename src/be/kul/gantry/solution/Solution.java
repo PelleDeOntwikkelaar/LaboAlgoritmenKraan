@@ -115,7 +115,13 @@ public class Solution {
         jobToSolve = null;
     }
 
+    /**
+     * Method that performs a preceding job.
+     * @param job Type Job: Job to complete in this method.
+     * @param gantry Type Gantry: Crane that will perform the given job.
+     */
     private void solvePrecedingJob(Job job, Gantry gantry) {
+
         Slot pickupSlot = job.getPickup().getSlot();
 
         Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
@@ -155,6 +161,9 @@ public class Solution {
 
     }
 
+    /**
+     * Method with a while loop that keeps on solving jobs until there are none left.
+     */
     public void solve() {
         while (!(inputQueue.isEmpty() && outputQueue.isEmpty() && jobToSolve == null && precedingJobs.isEmpty())) {
             solveNextJob();

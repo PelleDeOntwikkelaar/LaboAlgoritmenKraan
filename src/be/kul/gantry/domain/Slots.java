@@ -164,19 +164,21 @@ public class Slots {
 
     }
 
-    public Set<Slot> findForbiddenSlots(Slot slot){
+    public Set<Slot> findForbiddenSlots(Slot slotPrecedingPickUp,Slot slotToSolvePickUp){
         Set<Slot> forbiddenSlots= null;
 
         if (!shifted){
             forbiddenSlots= new HashSet<>();
-            int yIndex = (slot.getCenterY()-5)/10;
-            for(Slot slot1: slotArrayYDimension.get(yIndex)){
-                if(slot1.getCenterX()==slot.getCenterX()){
-                    forbiddenSlots.add(slot1);
+            int yIndex = (slotPrecedingPickUp.getCenterY()-5)/10;
+            for(Slot slot: slotArrayYDimension.get(yIndex)){
+                if(slot.getCenterX()==slotPrecedingPickUp.getCenterX()){
+                    forbiddenSlots.add(slot);
                 }
             }
         }else {
-            //TODO: link aan andere methode die lijst opvraagt voor shifted.
+            List<Slot> slots = getStackedSlots(slotToSolvePickUp);
+            forbiddenSlots =new HashSet<>();
+            forbiddenSlots.addAll(slots);
         }
 
         return forbiddenSlots;

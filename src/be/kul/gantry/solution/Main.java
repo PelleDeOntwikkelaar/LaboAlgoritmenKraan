@@ -12,6 +12,10 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+        String outputFileName ="output.csv";
+        String inputFileName1 = "1_10_100_4_FALSE_65_50_50.json";
+        String inputFileName2 = "1_10_100_4_TRUE_65_50_50.json";
+
 
         Scanner sc = new Scanner(System.in);
         int choice;
@@ -24,8 +28,8 @@ public class Main {
         choice = sc.nextInt();
 
         File inputFile;
-        File oneGantryFalseFile = new File("1_10_100_4_FALSE_65_50_50.json");
-        File oneGantryTrueFile = new File("1_10_100_4_TRUE_65_50_50.json");
+        File oneGantryFalseFile = new File(inputFileName1);
+        File oneGantryTrueFile = new File(inputFileName2);
         // File twoGantryTrueFile = new File("1_10_100_4_FALSE_65_50_50.json");
 
         if (choice == 1) {
@@ -39,7 +43,7 @@ public class Main {
 
         Problem problem;
         Solution solution;
-        CSVFileWriter csvFileWriter = new CSVFileWriter();
+        CSVFileWriter csvFileWriter = new CSVFileWriter(outputFileName);
         try {
             problem = Problem.fromJson(inputFile);
             solution = new Solution(problem,csvFileWriter, shifted);

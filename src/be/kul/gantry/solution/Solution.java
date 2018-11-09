@@ -117,7 +117,8 @@ public class Solution {
 
     private void solvePrecedingJob(Job job, Gantry gantry) {
         Slot pickupSlot = job.getPickup().getSlot();
-        Set<Slot> forbiddenSlots = slots.findForbiddenSlots(pickupSlot);
+
+        Set<Slot> forbiddenSlots = slots.findForbiddenSlots(pickupSlot,jobToSolve.getPickup().getSlot());
         Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed(),forbiddenSlots);
         job.getPlace().setSlot(bestFit);
 

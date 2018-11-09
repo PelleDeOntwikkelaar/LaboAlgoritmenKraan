@@ -11,13 +11,14 @@ public class CSVFileWriter {
 
     //CSV file header
     private static final String FILE_HEADER = "\"gID\";\"T\";\"x\";\"y\";\"itemInCraneID\" ";
-    private static final String FILE_NAME = "output.csv";
+    private  String file_name;
     private static final String FIRTS_LINE="0;0.0;0;0;null;";
 
     private StringBuilder stringBuilder;
 
-    public CSVFileWriter() {
+    public CSVFileWriter(String file_name) {
         stringBuilder = new StringBuilder();
+        this.file_name=file_name;
     }
 
     public void add(StringBuilder stb) {
@@ -28,7 +29,7 @@ public class CSVFileWriter {
         FileWriter fileWriter = null;
 
         try {
-            fileWriter = new FileWriter(FILE_NAME);
+            fileWriter = new FileWriter(file_name);
             fileWriter.append(FILE_HEADER);
             fileWriter.append(NEW_LINE_SEPARATOR);
             fileWriter.append(FIRTS_LINE);

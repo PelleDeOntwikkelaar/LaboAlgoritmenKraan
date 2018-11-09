@@ -3,10 +3,7 @@ package be.kul.gantry.solution;
 import be.kul.gantry.Extra.CSVFileWriter;
 import be.kul.gantry.domain.*;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 public class Solution {
 
@@ -74,7 +71,7 @@ public class Solution {
         if (jobToSolve.getPlace().getSlot() == null) {
 
             //calculate drop off slot
-            Slot bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(),-1,-1);
+            Slot bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(),null);
 
             //update Job parameters
             jobToSolve.getPlace().setSlot(bestFit);
@@ -120,7 +117,8 @@ public class Solution {
 
     private void solvePrecedingJob(Job job, Gantry gantry) {
         Slot pickupSlot = job.getPickup().getSlot();
-        Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed(),pickupSlot.getCenterX(),pickupSlot.getCenterY());
+        Set<Slot> forbiddenSlots = slots.findForbiddenSlots(pickupSlot);
+        Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed(),forbiddenSlots);
         job.getPlace().setSlot(bestFit);
 
         slots.removeItemFromSlot(job.getItem(), pickupSlot);

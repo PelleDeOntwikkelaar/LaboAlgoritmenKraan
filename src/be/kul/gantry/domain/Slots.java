@@ -97,14 +97,17 @@ public class Slots {
      * @param ySpeed
      * @return
      */
-    public Slot findBestSlot(int currentX, int currentY, double xSpeed, double ySpeed, int forbiddenX, int forbiddenY) {
+    public Slot findBestSlot(int currentX, int currentY, double xSpeed, double ySpeed, Set<Slot> forbiddenSlots) {
         //while loop is necessary, Y dimension can be full.
         int yArray = (currentY-5)/10;
         while(true){
             for (Slot slot : slotArrayYDimension.get(yArray)) {
                 //when an item is moved out of relocation purposes, the slot above may never be the destination slot
-                if (slot.getItem() == null && slot.getCenterX() != forbiddenX && slot.getCenterY() != forbiddenY){
-                    return slot;
+                if (slot.getItem() == null ){
+                    if((forbiddenSlots==null)||( forbiddenSlots!=null &&!forbiddenSlots.contains(slot))){
+                        return slot;
+                    }
+
                 }
             }
             if(yArray == yDimension-1) yArray = 0;
@@ -159,6 +162,24 @@ public class Slots {
         item.setSlotID(null);
         itemsInStorage.remove(item);
 
+    }
+
+    public Set<Slot> findForbiddenSlots(Slot slot){
+        Set<Slot> forbiddenSlots= null;
+
+        if (!shifted){
+            forbiddenSlots= new HashSet<>();
+            int yIndex = (slot.getCenterY()-5)/10;
+            for(Slot slot1: slotArrayYDimension.get(yIndex)){
+                if(slot1.getCenterX()==slot.getCenterX()){
+                    forbiddenSlots.add(slot1);
+                }
+            }
+        }else {
+            //TODO: link aan andere methode die lijst opvraagt voor shifted.
+        }
+
+        return forbiddenSlots;
     }
 
     /**

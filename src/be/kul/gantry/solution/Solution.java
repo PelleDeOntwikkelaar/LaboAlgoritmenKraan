@@ -35,7 +35,7 @@ public class Solution {
 
     private void initializeParameters(boolean shifted) {
         //Slots object is initialized with correct parameters.
-        slots = new Slots(problem.getItems(), problem.getMaxX(), problem.getMaxY(), problem.getMaxLevels(), shifted);
+        slots = new Slots(problem.getMaxX(), problem.getMaxY(), problem.getMaxLevels(), shifted);
         //queues are provided
         precedingJobs = new LinkedList<>();
         inputQueue = new LinkedList<>();
@@ -72,11 +72,9 @@ public class Solution {
         Gantry gantry = gantries.get(0);
 
         if (jobToSolve.getPlace().getSlot() == null) {
-            //calculate drop off zone
-            int zone= slots.calculateZone(jobToSolve.getItem(), outputQueue);
 
             //calculate drop off slot
-            Slot bestFit = slots.findBestSlot(zone, gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(),-1,-1);
+            Slot bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(),-1,-1);
 
             //update Job parameters
             jobToSolve.getPlace().setSlot(bestFit);
@@ -122,8 +120,7 @@ public class Solution {
 
     private void solvePrecedingJob(Job job, Gantry gantry) {
         Slot pickupSlot = job.getPickup().getSlot();
-        int zone=slots.calculateZone(job.getItem(),outputQueue);
-        Slot bestFit = slots.findBestSlot(zone, pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed(),pickupSlot.getCenterX(),pickupSlot.getCenterY());
+        Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed(),pickupSlot.getCenterX(),pickupSlot.getCenterY());
         job.getPlace().setSlot(bestFit);
 
         slots.removeItemFromSlot(job.getItem(), pickupSlot);

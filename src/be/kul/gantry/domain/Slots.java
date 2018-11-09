@@ -64,6 +64,7 @@ public class Slots {
      */
     public void addSlots(List<Slot> slots) {
         //werkt enkel voor niet shifted
+        //TODO: en nu voor shifted!
         /*
             wanneer we te maken hebben met een opslag slot, moet deze op de juiste manier worden aangemaakt en ingpast
             worden.

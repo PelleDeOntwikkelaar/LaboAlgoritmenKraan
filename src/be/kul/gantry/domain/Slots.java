@@ -218,27 +218,36 @@ public class Slots {
             return list;
 
         } else {
-            baseSize = slotArrayYDimension.get(0).size() / maxLevels;
+
+            int sizeCorrection = 0;
+            for (int i = 0; i < maxLevels; i++) {
+                sizeCorrection += i;
+            }
+
+            baseSize = (slotArrayYDimension.get(0).size()+sizeCorrection) / maxLevels;
 
             int z = slot.getZ() + 1;
+
+            int minus = 0;
 
             for (int i = z; i < maxLevels; i++) {
                 // checking all slots above current slot for items
                 System.out.println("checking i: " + i);
+
+                minus += baseSize-i;
+
                 for (int j = 0; j < i - z + 2; j++) {
 
                     int index = findShiftedX(slot);
-                    int correction = (z - 1) * 2;
 
-                    if (index + (i * baseSize) - z + j - correction >= slotArrayYDimension.get(row).size()) break;
+                    // prevents indexOutOfBoundsExceptions
+                    if (index + minus >= slotArrayYDimension.get(row).size()) break;
 
-                    Slot slt = slotArrayYDimension.get(row).get(index + (i * baseSize) - z + j - correction);
-
-                    System.out.println("    checkLevel: " + checkShiftedLevel(findShiftedX(slt), baseSize));
+                    Slot slt = slotArrayYDimension.get(row).get(index + minus + j);
 
                     if (checkShiftedLevel(findShiftedX(slt), baseSize) == i) {
                         list.add(slt);
-                        System.out.println(index + (i * baseSize) - z + j - correction);
+                        System.out.println(index + minus + j);
                     }
                 }
             }

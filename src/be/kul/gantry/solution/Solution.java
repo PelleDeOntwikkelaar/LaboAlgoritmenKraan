@@ -160,8 +160,6 @@ public class Solution {
         //print status after place task
         job.printStatus(gantry,csvFileWriter,time,Job.TaskType.PLACE);
         time+=10;
-
-
     }
 
     /**
@@ -172,7 +170,5 @@ public class Solution {
             solveNextJob();
         }
     }
-
-
 
 }

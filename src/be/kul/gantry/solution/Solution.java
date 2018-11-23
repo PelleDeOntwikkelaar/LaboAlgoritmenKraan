@@ -67,27 +67,24 @@ public class Solution {
     }
 
     private void solveInputJob() {
+        Gantry gantry = gantries.get(0);
+        Slot bestFit=null;
+        if(jobToSolve.getPlace().getSlot() == null){
 
-        if (gantries.size() == 1) {
-            Gantry gantry = gantries.get(0);
-
-            if (jobToSolve.getPlace().getSlot() == null) {
-
+            if (gantries.size() == 1) {
                 //calculate drop off slot
-                Slot bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(), null);
-
-                //update Job parameters
-                jobToSolve.getPlace().setSlot(bestFit);
-                slots.addItemToSlot(jobToSolve.getItem(), bestFit);
+                bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(), null);
+            }else{
+                bestFit=null;
             }
-
-            executeJob(jobToSolve, gantry);
-            System.out.println(jobToSolve + "time: " + time);
-
-            jobToSolve = null;
-        } else {
-            //todo: method for two gantry's
+            //update Job parameters
+            jobToSolve.getPlace().setSlot(bestFit);
         }
+
+        slots.addItemToSlot(jobToSolve.getItem(), bestFit);
+        executeJob(jobToSolve, gantry);
+        System.out.println(jobToSolve + "time: " + time);
+        jobToSolve = null;
     }
 
     private void solveOutputJob() {

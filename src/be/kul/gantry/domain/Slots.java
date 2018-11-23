@@ -115,6 +115,10 @@ public class Slots {
         }
     }
 
+    public Slot findBestSlotSingleGantry(){
+
+    }
+
     /**
      * Checks if item is in storage.
      *
@@ -198,6 +202,11 @@ public class Slots {
         return list;
     }
 
+    /**
+     *
+     * @param slot
+     * @return
+     */
     public List<Slot> getStackedSlots(Slot slot) {
         // the list we'll return
         LinkedList<Slot> list = new LinkedList<>();

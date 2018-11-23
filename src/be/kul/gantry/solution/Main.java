@@ -56,6 +56,7 @@ public class Main {
         CSVFileWriter csvFileWriter = new CSVFileWriter(outputFileName);
         try {
             problem = Problem.fromJson(inputFile);
+            File file =new File("input.json");
             solution = new Solution(problem, csvFileWriter, shifted);
             solution.solve();
         } catch (Exception e) {

@@ -48,7 +48,7 @@ public class Solution {
         gantries = problem.getGantries();
         time = 0;
 
-        jobNumber=((LinkedList<Job>) outputQueue).peekLast().getId()+1000;
+        jobNumber = ((LinkedList<Job>) outputQueue).peekLast().getId() + 1000;
     }
 
     public void solveNextJob() {
@@ -68,59 +68,66 @@ public class Solution {
 
     private void solveInputJob() {
 
-        // If there's only one gantry
-        Gantry gantry = gantries.get(0);
+        if (gantries.size() == 1) {
+            Gantry gantry = gantries.get(0);
 
-        if (jobToSolve.getPlace().getSlot() == null) {
+            if (jobToSolve.getPlace().getSlot() == null) {
 
-            //calculate drop off slot
-            Slot bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(),null);
+                //calculate drop off slot
+                Slot bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(), null);
 
-            //update Job parameters
-            jobToSolve.getPlace().setSlot(bestFit);
-            slots.addItemToSlot(jobToSolve.getItem(), bestFit);
+                //update Job parameters
+                jobToSolve.getPlace().setSlot(bestFit);
+                slots.addItemToSlot(jobToSolve.getItem(), bestFit);
+            }
+
+            executeJob(jobToSolve, gantry);
+            System.out.println(jobToSolve + "time: " + time);
+
+            jobToSolve = null;
+        } else {
+            //todo: method for two gantry's
         }
-
-        executeJob(jobToSolve, gantry);
-        System.out.println(jobToSolve+ "time: " +time);
-
-        jobToSolve = null;
     }
 
     private void solveOutputJob() {
 
-        // If there's only one gantry
-        Gantry gantry = gantries.get(0);
+        if (gantries.size() == 1) {
+            Gantry gantry = gantries.get(0);
 
-        if (jobToSolve.getPickup().getSlot() == null) {
-            Slot slot = slots.findSlotByItem(jobToSolve.getItem());
-            jobToSolve.getPickup().setSlot(slot);
-            List<Slot> stackedItems = slots.getStackedItemSlots(slot);
-            if (!stackedItems.isEmpty()) {
-                for (Slot slt :stackedItems) {
-                    Job job = new Job(jobNumber++, slt.getItem(), slt, null);
-                    job.getPickup().setSlot(slt);
-                    precedingJobs.addFirst(job);
+            if (jobToSolve.getPickup().getSlot() == null) {
+                Slot slot = slots.findSlotByItem(jobToSolve.getItem());
+                jobToSolve.getPickup().setSlot(slot);
+                List<Slot> stackedItems = slots.getStackedItemSlots(slot);
+                if (!stackedItems.isEmpty()) {
+                    for (Slot slt : stackedItems) {
+                        Job job = new Job(jobNumber++, slt.getItem(), slt, null);
+                        job.getPickup().setSlot(slt);
+                        precedingJobs.addFirst(job);
+                    }
+                    // execute all preceding jobs
+                    for (Job job : precedingJobs) {
+                        solvePrecedingJob(job, gantry);
+                    }
+                    precedingJobs.clear();
                 }
-                // execute all preceding jobs
-                for (Job job : precedingJobs) {
-                    solvePrecedingJob(job, gantry);
-                }
-                precedingJobs.clear();
+
+                slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
             }
 
-            slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
+            executeJob(jobToSolve, gantry);
+            System.out.println(jobToSolve + "time: " + time);
+
+            jobToSolve = null;
+        } else {
+            //todo: method for two gantry's
         }
-
-        executeJob(jobToSolve, gantry);
-        System.out.println(jobToSolve + "time: " +time);
-
-        jobToSolve = null;
     }
 
     /**
      * Method that performs a preceding job.
-     * @param job Type Job: Job to complete in this method.
+     *
+     * @param job    Type Job: Job to complete in this method.
      * @param gantry Type Gantry: Crane that will perform the given job.
      */
     private void solvePrecedingJob(Job job, Gantry gantry) {
@@ -128,38 +135,39 @@ public class Solution {
         Slot pickupSlot = job.getPickup().getSlot();
 
         Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
-        Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(),gantry.getXSpeed(), gantry.getYSpeed(),forbiddenSlots);
+        Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantry.getXSpeed(), gantry.getYSpeed(), forbiddenSlots);
         job.getPlace().setSlot(bestFit);
 
         slots.removeItemFromSlot(job.getItem(), pickupSlot);
         slots.addItemToSlot(job.getItem(), bestFit);
 
         executeJob(job, gantry);
-        System.out.println(job.toString()+ "time: " +time);
+        System.out.println(job.toString() + "time: " + time);
     }
 
     /**
      * Method that performs a job excecution in two different steps.
      * 1) Time calculation for crane movement and print crane movement.
      * 2) Time calculation of pickup/delivery and dor it and print specifics
-     * @param job Type Job: Job to complete in this method.
+     *
+     * @param job    Type Job: Job to complete in this method.
      * @param gantry Type Gantry: Crane that will perform the given job.
      */
     public void executeJob(Job job, Gantry gantry) {
 
         //move gantry to pickup slot and perform time analysis
-        job.performTask(gantry,job.getPickup());
+        job.performTask(gantry, job.getPickup());
         time += job.getPickup().getTime();
         //print status after pickup task
-        job.printStatus(gantry, csvFileWriter,time, Job.TaskType.PICKUP);
-        time+=10;
+        job.printStatus(gantry, csvFileWriter, time, Job.TaskType.PICKUP);
+        time += 10;
 
         //move gantry to place slot and perform time analysis
         job.performTask(gantry, job.getPlace());
         time += job.getPlace().getTime();
         //print status after place task
-        job.printStatus(gantry,csvFileWriter,time,Job.TaskType.PLACE);
-        time+=10;
+        job.printStatus(gantry, csvFileWriter, time, Job.TaskType.PLACE);
+        time += 10;
     }
 
     /**

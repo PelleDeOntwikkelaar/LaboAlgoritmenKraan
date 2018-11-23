@@ -115,8 +115,59 @@ public class Slots {
         }
     }
 
-    public Slot findBestSlotSingleGantry(){
+    public Slot tryFindBestSlotLeftToX(int x, Gantry gantry, Set<Slot> forbiddenSlots){
+        int yArray = (gantry.getCurrentY() - 5) / 10;
+        int arrayCounter=0;
+        while (arrayCounter!=yDimension) {
+            for (Slot slot : slotArrayYDimension.get(yArray)) {
+                //when an item is moved out of relocation purposes, the slot above may never be the destination slot
+                if (slot.getItem() == null) {
+                    if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot)) && slot.getCenterX()<x) {
+                        return slot;
+                    }
 
+                }
+            }
+            if (yArray == yDimension - 1) yArray = 0;
+            else yArray++;
+            arrayCounter++;
+        }
+
+        return null;
+
+    }
+
+    public Slot findBestSlotFirstGantry(Job job, List<Gantry> gantries, Set<Slot> forbiddenSlots){
+        //try to find slot left from second crane
+        int minX=findMinX(gantries.get(1));
+        Slot bestSlot=tryFindBestSlotLeftToX(minX-20,gantries.get(0),forbiddenSlots);
+        if(bestSlot==null){
+            bestSlot=tryFindBestSlotLeftToX(outputSlot.getCenterX(),gantries.get(0),forbiddenSlots);
+        }
+        return bestSlot;
+    }
+
+    private int findMinX(Gantry gantry) {
+        if(gantry.getCurrentJob()!=null&& gantry.getCurrentJob().getPlace()!=null)return Math.min(gantry.getCurrentX(), gantry.getCurrentJob().getPlace().getSlot().getCenterX());
+        else return gantry.getCurrentX();
+    }
+
+    private int findMaxX(Gantry gantry) {
+        if(gantry.getCurrentJob()!=null && gantry.getCurrentJob().getPlace()!=null) return Math.max(gantry.getCurrentX(), gantry.getCurrentJob().getPlace().getSlot().getCenterX());
+        else return gantry.getCurrentX();
+    }
+
+    public Slot findBestSlotSecondGantry(Job job, List<Gantry> gantries, Set<Slot> forbiddenSlots){
+        int maxX=findMaxX(gantries.get(0));
+        Slot bestSlot=tryFindBestSlotRightToX(maxX+20,gantries.get(0),forbiddenSlots);
+        if(bestSlot==null){
+            bestSlot=tryFindBestSlotRightToX(outputSlot.getCenterX(),gantries.get(0),forbiddenSlots);
+        }
+        return bestSlot;
+    }
+
+    private Slot tryFindBestSlotRightToX(int i, Gantry gantry, Set<Slot> forbiddenSlots) {
+        //todo:finish logic.
     }
 
     /**

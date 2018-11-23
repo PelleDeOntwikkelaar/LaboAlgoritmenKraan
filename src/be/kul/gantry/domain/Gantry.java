@@ -13,6 +13,8 @@ public class Gantry {
     private int currentX;
     private int currentY;
 
+    private Job currentJob;
+
     public Gantry(int id,
                   int xMin, int xMax,
                   int startX, int startY,
@@ -114,5 +116,13 @@ public class Gantry {
 
         return stb.toString();
 
+    }
+
+    public Job getCurrentJob() {
+        return currentJob;
+    }
+
+    public void setCurrentJob(Job currentJob) {
+        this.currentJob = currentJob;
     }
 }

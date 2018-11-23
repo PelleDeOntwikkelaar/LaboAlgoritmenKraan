@@ -75,7 +75,7 @@ public class Solution {
                 //calculate drop off slot
                 bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(), null);
             }else{
-                bestFit=null;
+                bestFit=slots.findBestSlotFirstGantry(jobToSolve, gantries,null);
             }
             //update Job parameters
             jobToSolve.getPlace().setSlot(bestFit);

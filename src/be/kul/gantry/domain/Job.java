@@ -14,14 +14,16 @@ public class Job {
 
     private final Item item;
 
-    private double time;
-
+    private double startingTimePickup;
+    private double startingTimePlace;
+    //todo: calculate position of each gantry for each startingTime unit
+    //todo: check position of the other gantry and correct startingTime and position if necessary
 
     public Job(int id, Item c, Slot from, Slot to) {
         this.id = id;
         this.item = c;
-        this.pickup = new Task(id*2,TaskType.PICKUP);
-        this.place = new Task(id*2+1,TaskType.PLACE);
+        this.pickup = new Task(id * 2, TaskType.PICKUP);
+        this.place = new Task(id * 2 + 1, TaskType.PLACE);
         this.pickup.slot = from;
         this.place.slot = to;
     }
@@ -42,13 +44,25 @@ public class Job {
         return item;
     }
 
-    public double getTime() {
-        return time;
+    public double getStartingTimePickup() {
+        return startingTimePickup;
+    }
+
+    public void setStartingTimePickup(double startingTimePickup) {
+        this.startingTimePickup = startingTimePickup;
+    }
+
+    public double getStartingTimePlace() {
+        return startingTimePlace;
+    }
+
+    public void setStartingTimePlace(double startingTimePlace) {
+        this.startingTimePlace = startingTimePlace;
     }
 
     @Override
     public String toString() {
-        return String.format("J%d move %d from %s to %s in %f",id,item.getId(),pickup.slot,place.slot,time);
+        return String.format("J%d move %d from %s to %s in %f", id, item.getId(), pickup.slot, place.slot, startingTimePickup);
     }
 
     public void performTask(Gantry gantry, Task task) {
@@ -56,19 +70,17 @@ public class Job {
         gantry.moveCrane(task.slot.getCenterX(), task.slot.getCenterY());
     }
 
-
-    public void printStatus(Gantry gantry, CSVFileWriter csvFileWriter, double totalTime,TaskType type) {
+    public void printStatus(Gantry gantry, CSVFileWriter csvFileWriter, double totalTime, TaskType type) {
         StringBuilder stb1 = new StringBuilder();
         StringBuilder stb2 = new StringBuilder();
         stb1.append(gantry.printStatus(totalTime));
-        stb2.append(gantry.printStatus(totalTime+10));
+        stb2.append(gantry.printStatus(totalTime + 10));
 
         if (type == TaskType.PICKUP) {
             stb1.append("null");
             stb2.append(item.getId());
 
-        }
-        else {
+        } else {
             stb1.append(item.getId());
             stb2.append("null");
         }
@@ -118,13 +130,12 @@ public class Job {
             return time;
         }
 
-
         public void calculateTime(Gantry gantry) {
 
             int xDistance;
             int yDistance;
 
-            if (type == TaskType.PICKUP){
+            if (type == TaskType.PICKUP) {
                 xDistance = Math.abs(slot.getCenterX() - gantry.getCurrentX());
                 yDistance = Math.abs(slot.getCenterY() - gantry.getCurrentY());
             } else {
@@ -133,20 +144,20 @@ public class Job {
             }
 
 
-            double xTime = xDistance/gantry.getXSpeed();
-            double yTime = yDistance/gantry.getYSpeed();
+            double xTime = xDistance / gantry.getXSpeed();
+            double yTime = yDistance / gantry.getYSpeed();
 
-            time= Math.max(xTime,yTime);
+            time = Math.max(xTime, yTime);
 
-            // System.out.println("x: " + xTime + ", y: " + yTime + ", time: " + time);
+            // System.out.println("x: " + xTime + ", y: " + yTime + ", startingTime: " + startingTime);
         }
 
         @Override
         public String toString() {
-            if(type == TaskType.PICKUP) {
-                return String.format("Pickup %d from %s",Job.this.item.getId(),slot);
+            if (type == TaskType.PICKUP) {
+                return String.format("Pickup %d from %s", Job.this.item.getId(), slot);
             } else {
-                return String.format("Place %d at %s",Job.this.item.getId(),slot);
+                return String.format("Place %d at %s", Job.this.item.getId(), slot);
             }
         }
     }

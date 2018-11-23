@@ -284,7 +284,7 @@ public class Slots {
                 sizeCorrection += i;
             }
 
-            baseSize = (slotArrayYDimension.get(0).size()+sizeCorrection) / maxLevels;
+            baseSize = (slotArrayYDimension.get(0).size() + sizeCorrection) / maxLevels;
 
             int z = slot.getZ() + 1;
 
@@ -294,7 +294,7 @@ public class Slots {
                 // checking all slots above current slot for items
                 System.out.println("checking i: " + i);
 
-                minus += baseSize-i;
+                minus += baseSize - i;
 
                 for (int j = 0; j < i - z + 2; j++) {
 

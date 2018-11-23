@@ -26,6 +26,9 @@ public class Solution {
     private double time;
     private int jobNumber;
 
+    private LinkedList<Job> currentJobs;
+    private int globalTime;
+
 
     public Solution(Problem problem, CSVFileWriter csvFileWriter, boolean shifted) {
         this.csvFileWriter = csvFileWriter;
@@ -49,6 +52,7 @@ public class Solution {
         time = 0;
 
         jobNumber = ((LinkedList<Job>) outputQueue).peekLast().getId() + 1000;
+        globalTime = 0;
     }
 
     public void solveNextJob() {
@@ -118,6 +122,9 @@ public class Solution {
             jobToSolve = null;
         } else {
             //todo: method for two gantry's
+            Gantry gantry = gantries.get(1);
+
+            //todo: method to set the digging sequence up
         }
     }
 
@@ -129,17 +136,23 @@ public class Solution {
      */
     private void solvePrecedingJob(Job job, Gantry gantry) {
 
-        Slot pickupSlot = job.getPickup().getSlot();
+        if (gantries.size() == 1) {
 
-        Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
-        Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantry.getXSpeed(), gantry.getYSpeed(), forbiddenSlots);
-        job.getPlace().setSlot(bestFit);
+            Slot pickupSlot = job.getPickup().getSlot();
 
-        slots.removeItemFromSlot(job.getItem(), pickupSlot);
-        slots.addItemToSlot(job.getItem(), bestFit);
+            Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
+            Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantry.getXSpeed(), gantry.getYSpeed(), forbiddenSlots);
+            job.getPlace().setSlot(bestFit);
 
-        executeJob(job, gantry);
-        System.out.println(job.toString() + "time: " + time);
+            slots.removeItemFromSlot(job.getItem(), pickupSlot);
+            slots.addItemToSlot(job.getItem(), bestFit);
+
+            executeJob(job, gantry);
+            System.out.println(job.toString() + "time: " + time);
+
+        } else {
+            //todo: find new best fit based on the gantry
+        }
     }
 
     /**
@@ -171,9 +184,31 @@ public class Solution {
      * Method with a while loop that keeps on solving jobs until there are none left.
      */
     public void solve() {
-        while (!(inputQueue.isEmpty() && outputQueue.isEmpty() && jobToSolve == null && precedingJobs.isEmpty())) {
+        /*while (!(inputQueue.isEmpty() && outputQueue.isEmpty() && jobToSolve == null && precedingJobs.isEmpty())) {
             solveNextJob();
+        }*/
+
+        Boolean continueLoop = true;
+        while (continueLoop) {
+
+            /*todo: check currentJobs
+            * todo: on time print part of job
+            * todo: if job is done => remove job from list, set gantry to idle
+            * todo: assign new job to idle gantry
+            * todo: for inputGantry prioritize digging over input jobs*/
+            for (Job job : currentJobs) {
+
+                //if (globalTime == job.getStartingTimePlace())
+
+
+            }
+
+            globalTime++;
+
+            if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty())
+                continueLoop = false;
         }
+
     }
 
 }

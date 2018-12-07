@@ -79,7 +79,8 @@ public class Solution {
                 //calculate drop off slot
                 bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(), null);
             }else{
-                bestFit=slots.findBestSlotFirstGantry(jobToSolve, gantries,null);
+                //calculate drop off slot when working whit multiple gantries.
+                bestFit=slots.findBestSlotFirstGantry(jobToSolve, gantries,null,false,0);
             }
             //update Job parameters
             jobToSolve.getPlace().setSlot(bestFit);
@@ -92,67 +93,63 @@ public class Solution {
     }
 
     private void solveOutputJob() {
-
-        if (gantries.size() == 1) {
-            Gantry gantry = gantries.get(0);
-
-            if (jobToSolve.getPickup().getSlot() == null) {
-                Slot slot = slots.findSlotByItem(jobToSolve.getItem());
-                jobToSolve.getPickup().setSlot(slot);
-                List<Slot> stackedItems = slots.getStackedItemSlots(slot);
-                if (!stackedItems.isEmpty()) {
-                    for (Slot slt : stackedItems) {
-                        Job job = new Job(jobNumber++, slt.getItem(), slt, null);
-                        job.getPickup().setSlot(slt);
-                        precedingJobs.addFirst(job);
-                    }
-                    // execute all preceding jobs
-                    for (Job job : precedingJobs) {
-                        solvePrecedingJob(job, gantry);
-                    }
-                    precedingJobs.clear();
-                }
-
-                slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
-            }
-
-            executeJob(jobToSolve, gantry);
-            System.out.println(jobToSolve + "time: " + time);
-
-            jobToSolve = null;
-        } else {
-            //todo: method for two gantry's
-            Gantry gantry = gantries.get(1);
-
-            //todo: method to set the digging sequence up
+        //pre solving work: finding item, computing stacked slots,..
+        Slot slot = slots.findSlotByItem(jobToSolve.getItem());
+        if (jobToSolve.getPickup().getSlot() == null) {
+            jobToSolve.getPickup().setSlot(slot);
         }
+        int refX = slot.getCenterX();
+        int refY= slot.getCenterY();
+
+        //finding stacked items
+        List<Slot> stackedItems = slots.getStackedItemSlots(slot);
+
+        //solving stacked items
+        if (!stackedItems.isEmpty()) {
+            for (Slot slt : stackedItems) {
+                Job job = new Job(jobNumber++, slt.getItem(), slt, null);
+                job.getPickup().setSlot(slt);
+                precedingJobs.addFirst(job);
+            }
+            for (Job job : precedingJobs) {
+                int gantryIndex = slots.findSuitableGantry(job, gantries, refX, refY);
+                solvePrecedingJob(job, gantryIndex, refX);
+            }
+            precedingJobs.clear();
+        }
+
+        //get last crane: last crane always has to perform output jobs.
+        Gantry gantry = gantries.get(gantries.size()-1);
+        slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
+        //execute output job.
+        executeJob(jobToSolve, gantry);
+        System.out.println(jobToSolve + "time: " + time);
     }
 
     /**
      * Method that performs a preceding job.
      *
      * @param job    Type Job: Job to complete in this method.
-     * @param gantry Type Gantry: Crane that will perform the given job.
+     * @param gantryIndex Type Integer: Crane that will perform the given job.
      */
-    private void solvePrecedingJob(Job job, Gantry gantry) {
+    private void solvePrecedingJob(Job job, int gantryIndex, int refX) {
+        Slot pickupSlot = job.getPickup().getSlot();
+        Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
+        Slot bestFit;
+        if(gantries.size() == 1){
+            bestFit=slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantries.get(gantryIndex).getXSpeed(), gantries.get(gantryIndex).getYSpeed(), forbiddenSlots);
+        }else{
+            boolean leftRight;
+            if(gantryIndex==0)bestFit=slots.findBestSlotFirstGantry(job,gantries,forbiddenSlots,true,refX);
+            else bestFit =slots.findBestSlotSecondGantry(job,gantries,forbiddenSlots,true,refX);
 
-        if (gantries.size() == 1) {
-
-            Slot pickupSlot = job.getPickup().getSlot();
-
-            Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
-            Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantry.getXSpeed(), gantry.getYSpeed(), forbiddenSlots);
-            job.getPlace().setSlot(bestFit);
-
-            slots.removeItemFromSlot(job.getItem(), pickupSlot);
-            slots.addItemToSlot(job.getItem(), bestFit);
-
-            executeJob(job, gantry);
-            System.out.println(job.toString() + "time: " + time);
-
-        } else {
-            //todo: find new best fit based on the gantry
         }
+
+        slots.removeItemFromSlot(job.getItem(), pickupSlot);
+        slots.addItemToSlot(job.getItem(), bestFit);
+
+        executeJob(job, gantries.get(gantryIndex));
+        System.out.println(job.toString() + "time: " + time);
     }
 
     /**

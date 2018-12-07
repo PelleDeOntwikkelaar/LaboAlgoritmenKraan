@@ -241,7 +241,7 @@ public class Slots {
                     int index = findShiftedX(slot);
 
                     // prevents indexOutOfBoundsExceptions
-                    if (index + minus >= slotArrayYDimension.get(row).size()) break;
+                    if (index + minus + j >= slotArrayYDimension.get(row).size()) break;
 
                     Slot slt = slotArrayYDimension.get(row).get(index + minus + j);
 
@@ -264,6 +264,7 @@ public class Slots {
      */
     public int checkShiftedLevel(int index, int baseLevel) {
         int level = 0;
+
         while (index > 0) {
             index -= baseLevel;
             if (index >= 0) {

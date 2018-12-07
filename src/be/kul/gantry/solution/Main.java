@@ -12,38 +12,15 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        String outputFileName ="output.csv";
-        String inputFileName1 = "1_10_100_4_FALSE_65_50_50.json";
-        String inputFileName2 = "1_10_100_4_TRUE_65_50_50.json";
 
 
-        Scanner sc = new Scanner(System.in);
-        int choice;
-        boolean shifted;
+        boolean shifted =isShifted(args[0]);
+        File inputFile = new File(args[0]);
 
-        System.out.println("Choose your input file:");
-        System.out.println("    1. input file: " + inputFileName1);
-        System.out.println("    2. input file: " + inputFileName2);
-
-        choice = sc.nextInt();
-
-        File inputFile;
-        File oneGantryFalseFile = new File(inputFileName1);
-        File oneGantryTrueFile = new File(inputFileName2);
-        // File twoGantryTrueFile = new File("1_10_100_4_FALSE_65_50_50.json");
-
-        if (choice == 1) {
-            inputFile = oneGantryFalseFile;
-            shifted = false;
-        } else if (choice == 2) {
-            inputFile = oneGantryTrueFile;
-            shifted = true;
-        }
-        else return;
 
         Problem problem;
         Solution solution;
-        CSVFileWriter csvFileWriter = new CSVFileWriter(outputFileName);
+        CSVFileWriter csvFileWriter = new CSVFileWriter(args[1]);
         try {
             problem = Problem.fromJson(inputFile);
             solution = new Solution(problem,csvFileWriter, shifted);
@@ -60,6 +37,23 @@ public class Main {
 
 
 
+    }
+
+    public static boolean isShifted(String inputName){
+        int count=0;
+        int startIndex=0;
+        boolean set=false;
+        for (int i=0;i<inputName.toCharArray().length;i++){
+            if(inputName.toCharArray()[i]=='_') count ++;
+            if(count==4 && !set) {
+                startIndex=i+1;
+                set=true;
+            }
+        }
+        int stopIndex=startIndex+4;
+        String boolStr=inputName.substring(startIndex,stopIndex);
+        if(boolStr.equals("TRUE"))return true;
+        return false;
     }
 }
 

@@ -16,6 +16,7 @@ public class Job {
 
     private double startingTimePickup;
     private double startingTimePlace;
+
     //todo: calculate position of each gantry for each startingTime unit
     //todo: check position of the other gantry and correct startingTime and position if necessary
 

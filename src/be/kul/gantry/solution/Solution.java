@@ -204,11 +204,35 @@ public class Solution {
 
             }
 
-            globalTime++;
-
-            if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty())
-                continueLoop = false;
+            continueLoop=checkLoop();
+            globalTime+=setToNextSafeTime();
         }
+
+    }
+
+    private int setToNextSafeTime(){
+        int shortestTime=Integer.MAX_VALUE;
+        //todo: check all gantries, when one is idle, check pos, if save, move tim to that position
+        for(Gantry gantry: gantries){
+            if(gantry.getCurrentJob()!=null){
+                if (gantry.getCurrentJob().getRemainingTime() < shortestTime) {
+                    shortestTime = gantry.getCurrentJob().getRemainingTime();
+                }
+            }
+        }
+
+        int safeTime= findMaxSafeTime(shortestTime);
+
+    }
+
+    private boolean checkLoop(){
+        if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty()){
+            return false;
+        }
+        return true;
+    }
+
+    private int findMaxSafeTime(int time){
 
     }
 

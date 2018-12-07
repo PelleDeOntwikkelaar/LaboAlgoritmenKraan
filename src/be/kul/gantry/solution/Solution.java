@@ -195,7 +195,8 @@ public class Solution {
             * todo: on time print part of job
             * todo: if job is done => remove job from list, set gantry to idle
             * todo: assign new job to idle gantry
-            * todo: for inputGantry prioritize digging over input jobs*/
+            * todo: for inputGantry prioritize digging over input jobs
+            * todo: extra*/
             for (Job job : currentJobs) {
 
                 //if (globalTime == job.getStartingTimePlace())

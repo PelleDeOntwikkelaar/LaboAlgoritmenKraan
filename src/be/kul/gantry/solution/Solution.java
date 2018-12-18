@@ -194,23 +194,31 @@ public class Solution {
              * assign new job to idle gantry
              * todo: for inputGantry prioritize digging over input jobs
              * todo: extra*/
-            for (Job job : currentJobs) {
-
-                if (globalTime == job.getStartingTimePlace()) {
-                    // todo: print place
-                } else if (globalTime == job.getStartingTimePickup()) {
-                    // todo: print pickup
-                } else if (globalTime > job.getStartingTimePlace() + job.getPlace().getTime()) {
-                    // todo: remove job, set gantry to idle
+            //for (Job job : currentJobs) {
+            for (Gantry gantry : gantries) {
+                Job job = gantry.getCurrentJob();
+                if (job == null) {
+                    if (!precedingJobs.isEmpty()) {
+                        // todo: assign preceding job
+                    } else {
+                        // todo: assign in- or output job to gantry
+                    }
                 }
 
+                if (globalTime == job.getStartingTimePlace() ||
+                        globalTime == job.getStartingTimePickup() ||
+                        globalTime == job.getStartingTimePickup() + job.getPickup().getTime() ||
+                        globalTime == job.getStartingTimePlace() + job.getPlace().getTime()
+                ) {
+                    gantry.printStatus(globalTime);
+                }
 
+                if (globalTime >= job.getStartingTimePlace() + job.getPlace().getTime()) {
+                    gantry.setCurrentJob(null);
+                }
             }
 
-            // todo: assign new job to idle gantry
-
             continueLoop = checkLoop();
-            //globalTime += setToNextSafeTime();
             globalTime++;
         }
 

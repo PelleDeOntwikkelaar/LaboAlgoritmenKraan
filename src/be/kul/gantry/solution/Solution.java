@@ -49,6 +49,9 @@ public class Solution {
         //Slots are being put into place, with correct parameters and dimensions
         slots.addSlots(problem.getSlots());
         gantries = problem.getGantries();
+        for(Gantry gantry: gantries){
+            gantry.setPickUpPlaceDuration(problem.getPickupPlaceDuration());
+        }
         time = 0;
 
         jobNumber = ((LinkedList<Job>) outputQueue).peekLast().getId() + 1000;
@@ -234,6 +237,7 @@ public class Solution {
         }
         return true;
     }
+
 
 
 

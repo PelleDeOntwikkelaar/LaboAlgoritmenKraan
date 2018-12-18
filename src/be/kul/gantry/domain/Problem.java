@@ -249,8 +249,8 @@ public class Problem {
                 int xMax = ((Long) gantry.get("xMax")).intValue();
                 int startX = ((Long) gantry.get("startX")).intValue();
                 int startY = ((Long) gantry.get("startY")).intValue();
-                double xSpeed = ((Double) gantry.get("xSpeed")).doubleValue();
-                double ySpeed = ((Double) gantry.get("ySpeed")).doubleValue();
+                Integer xSpeed = ((Double) gantry.get("xSpeed")).doubleValue();
+                Integer ySpeed = ((Double) gantry.get("ySpeed")).doubleValue();
 
                 Gantry g = new Gantry(id, xMin, xMax, startX, startY, xSpeed, ySpeed);
                 gantryList.add(g);

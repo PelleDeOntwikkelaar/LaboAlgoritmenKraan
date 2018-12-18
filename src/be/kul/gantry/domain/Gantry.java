@@ -1,5 +1,7 @@
 package be.kul.gantry.domain;
 
+import java.util.ArrayList;
+
 /**
  * Created by Wim on 27/04/2015.
  */
@@ -8,17 +10,26 @@ public class Gantry {
     private final int id;
     private final int xMin, xMax;
     private final int startX, startY;
-    private final double xSpeed, ySpeed;
+    private final Integer xSpeed;
+    private final Integer ySpeed;
 
     private int currentX;
     private int currentY;
 
+    private int moveToX;
+    private int moveToY;
+
     private Job currentJob;
+    private gantryMode mode;
+    private int pickUpPlaceCountDown;
+    private int pickUpPlaceDuration;
+
+
 
     public Gantry(int id,
                   int xMin, int xMax,
                   int startX, int startY,
-                  double xSpeed, double ySpeed) {
+                  Integer xSpeed, Integer ySpeed) {
         this.id = id;
         this.xMin = xMin;
         this.xMax = xMax;
@@ -75,6 +86,38 @@ public class Gantry {
         this.currentY = currentY;
     }
 
+    public int getMoveToX() {
+        return moveToX;
+    }
+
+    public void setMoveToX(int moveToX) {
+        this.moveToX = moveToX;
+    }
+
+    public int getMoveToY() {
+        return moveToY;
+    }
+
+    public void setMoveToY(int moveToY) {
+        this.moveToY = moveToY;
+    }
+
+    public gantryMode getMode() {
+        return mode;
+    }
+
+    public void setMode(gantryMode mode) {
+        this.mode = mode;
+    }
+
+    public int getPickUpPlaceDuration() {
+        return pickUpPlaceDuration;
+    }
+
+    public void setPickUpPlaceDuration(int pickUpPlaceDuration) {
+        this.pickUpPlaceDuration = pickUpPlaceDuration;
+    }
+
     public boolean overlapsGantryArea(Gantry g) {
         return g.xMin < xMax && xMin < g.xMax;
     }
@@ -97,6 +140,77 @@ public class Gantry {
     public void moveCrane(int centerX, int centerY) {
         currentX = centerX;
         currentY = centerY;
+    }
+    public void moveCraneToNewPosition(double currentTime){
+        int xInt=moveToX-currentX;
+        int yInt=moveToY-currentY;
+
+        posUpdate(0,xInt,moveToX,xSpeed);
+        posUpdate(1,yInt,moveToY,ySpeed);
+
+        checkForMoveTransition(currentTime);
+
+    }
+
+    private void checkForMoveTransition(double currentTime) {
+
+        if(currentJob.getPickup().getSlot().getCenterX()==currentX&&currentJob.getPickup().getSlot().getCenterY()==currentY){
+            mode=gantryMode.PICKUP;
+            printStatus(currentTime);
+            pickUpPlaceCountDown=pickUpPlaceDuration;
+        }else if(currentJob.getPlace().getSlot().getCenterX()==currentX&&currentJob.getPlace().getSlot().getCenterY()==currentY){
+            mode=gantryMode.PLACE;
+            printStatus(currentTime);
+            pickUpPlaceCountDown=pickUpPlaceDuration;
+        }
+    }
+
+    public void checkForPickUpTransition(double currentTime){
+        if (pickUpPlaceCountDown==0){
+            moveToX=currentJob.getPlace().getSlot().getCenterX();
+            moveToY=currentJob.getPlace().getSlot().getCenterY();
+            mode=gantryMode.MOVE;
+            //todo: item moet verwijderd worden uit slot
+            printStatus(currentTime);
+        }
+    }
+
+    public void checkForPlaceTransition(double currentTime){
+        if (pickUpPlaceCountDown==0){
+            mode=gantryMode.IDLE;
+            //todo: item moet verwijderd worden uit slot
+            printStatus(currentTime);
+        }
+    }
+
+    public void checkForIdleTransition(double currentTime){
+        if(currentX!=moveToX &&currentY!=moveToY){
+            mode=gantryMode.MOVE;
+            printStatus(currentTime);
+        }
+    }
+
+    public void decreasePickupPlaceCountDown(){
+        pickUpPlaceCountDown--;
+    }
+
+    private void posUpdate(int currentIndex, int interval, int moveTo, double speed){
+        ArrayList<Integer> current=new ArrayList<>();
+        current.add(currentX);
+        current.add(currentY);
+        if(interval>speed){
+            if(currentIndex==0)currentX+=speed;
+            else currentY+=speed;
+        }else if(interval>0){
+            if(currentIndex==0)currentX=moveTo;
+            else currentY=moveTo;
+        }else if(interval<(-1)*speed){
+            if(currentIndex==0)currentX-=speed;
+            else currentY-=speed;
+        }else if(interval<0){
+            if(currentIndex==0)currentX=moveTo;
+            else currentY=moveTo;
+        }
     }
 
     public String printStatus(double totalTime) {
@@ -130,5 +244,13 @@ public class Gantry {
 
     public void setCurrentJob(Job currentJob) {
         this.currentJob = currentJob;
+    }
+
+    public enum gantryMode {
+        PICKUP,
+        PLACE,
+        WAIT,
+        MOVE,
+        IDLE
     }
 }

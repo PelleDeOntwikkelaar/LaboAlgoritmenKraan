@@ -70,7 +70,7 @@ public class Solution {
         }
     }
 
-    private void solveInputJob() {
+    private Job solveInputJob() {
         Gantry gantry = gantries.get(0);
         Slot bestFit = null;
         if (jobToSolve.getPlace().getSlot() == null) {
@@ -86,13 +86,10 @@ public class Solution {
             jobToSolve.getPlace().setSlot(bestFit);
         }
 
-        slots.addItemToSlot(jobToSolve.getItem(), bestFit);
-        executeJob(jobToSolve, gantry);
-        System.out.println(jobToSolve + "time: " + time);
-        jobToSolve = null;
+        return jobToSolve;
     }
 
-    private void solveOutputJob() {
+    private Job solveOutputJob() {
         //pre solving work: finding item, computing stacked slots,..
         Slot slot = slots.findSlotByItem(jobToSolve.getItem());
         if (jobToSolve.getPickup().getSlot() == null) {
@@ -110,11 +107,9 @@ public class Solution {
                 precedingJobs.addFirst(job);
             }
             precedingJobs.addLast(jobToSolve);
+            return null;
         }else{
-            slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
-            //execute output job.
-            executeJob(jobToSolve, gantries.get(gantries.size() - 1));
-            System.out.println(jobToSolve + "time: " + time);
+            return jobToSolve;
         }
 
     }
@@ -125,24 +120,20 @@ public class Solution {
      * @param job         Type Job: Job to complete in this method.
      * @param gantryIndex Type Integer: Crane that will perform the given job.
      */
-    private void solvePrecedingJob(Job job, int gantryIndex, int refX) {
+    private Job solvePrecedingJob(Job job, int gantryIndex, int refX) {
         Slot pickupSlot = job.getPickup().getSlot();
         Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
         Slot bestFit;
         if (gantries.size() == 1) {
             bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantries.get(gantryIndex).getXSpeed(), gantries.get(gantryIndex).getYSpeed(), forbiddenSlots);
         } else {
-            boolean leftRight;
             if (gantryIndex == 0) bestFit = slots.findBestSlotFirstGantry(job, gantries, forbiddenSlots, true, refX);
             else bestFit = slots.findBestSlotSecondGantry(job, gantries, forbiddenSlots, true, refX);
 
         }
 
-        slots.removeItemFromSlot(job.getItem(), pickupSlot);
-        slots.addItemToSlot(job.getItem(), bestFit);
-
-        executeJob(job, gantries.get(gantryIndex));
-        System.out.println(job.toString() + "time: " + time);
+        job.getPlace().setSlot(bestFit);
+        return job;
     }
 
     /**

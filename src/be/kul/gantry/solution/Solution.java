@@ -124,15 +124,18 @@ public class Solution {
         Slot pickupSlot = job.getPickup().getSlot();
         Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
         Slot bestFit;
-        if (gantries.size() == 1) {
-            bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantries.get(gantryIndex).getXSpeed(), gantries.get(gantryIndex).getYSpeed(), forbiddenSlots);
-        } else {
-            if (gantryIndex == 0) bestFit = slots.findBestSlotFirstGantry(job, gantries, forbiddenSlots, true, refX);
-            else bestFit = slots.findBestSlotSecondGantry(job, gantries, forbiddenSlots, true, refX);
+        if (job.getPlace().getSlot()==null){
+            if (gantries.size() == 1) {
+                bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantries.get(gantryIndex).getXSpeed(), gantries.get(gantryIndex).getYSpeed(), forbiddenSlots);
+            } else {
+                if (gantryIndex == 0) bestFit = slots.findBestSlotFirstGantry(job, gantries, forbiddenSlots, true, refX);
+                else bestFit = slots.findBestSlotSecondGantry(job, gantries, forbiddenSlots, true, refX);
 
+            }
+
+            job.getPlace().setSlot(bestFit);
         }
 
-        job.getPlace().setSlot(bestFit);
         return job;
     }
 

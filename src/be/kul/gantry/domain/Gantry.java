@@ -114,6 +114,12 @@ public class Gantry {
         stb.append(currentY);
         stb.append(";");
 
+        if (currentJob.getItem() == null) stb.append("null");
+        else stb.append(currentJob.getItem().getId());
+        stb.append(";");
+
+        stb.append("\n");
+
         return stb.toString();
 
     }

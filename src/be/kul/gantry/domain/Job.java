@@ -163,7 +163,7 @@ public class Job {
         }
     }
 
-    public static enum TaskType {
+    public enum TaskType {
         PICKUP,
         PLACE
     }

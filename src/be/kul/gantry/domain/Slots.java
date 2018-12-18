@@ -28,7 +28,7 @@ public class Slots {
      */
     public Slots(int maxX, int maxY, int maxLevels, boolean shifted) {
 
-        this.maxX=maxX;
+        this.maxX = maxX;
         this.yDimension = maxY / 10;
         this.xDimension = (maxX - 20) / 10;
         this.shifted = shifted;
@@ -118,52 +118,54 @@ public class Slots {
 
     /**
      * Method to find best placement slot for first Gantry when working with multiple gantries.
+     *
      * @param job
      * @param gantries
      * @param forbiddenSlots
      * @return
      */
-    public Slot findBestSlotFirstGantry(Job job, List<Gantry> gantries, Set<Slot> forbiddenSlots, boolean precedingJob, int refX){
+    public Slot findBestSlotFirstGantry(Job job, List<Gantry> gantries, Set<Slot> forbiddenSlots, boolean precedingJob, int refX) {
         int minX;
-        if(precedingJob) minX=refX;
-        else minX=findMinX(gantries.get(1));
-        Slot bestSlot=tryFindBestSlotLeftRightToX(minX-20,gantries.get(0),forbiddenSlots, true);
-        if(bestSlot==null){
-            bestSlot=tryFindBestSlotLeftRightToX(outputSlot.getCenterX(),gantries.get(0),forbiddenSlots, true);
+        if (precedingJob) minX = refX;
+        else minX = findMinX(gantries.get(1));
+        Slot bestSlot = tryFindBestSlotLeftRightToX(minX - 20, gantries.get(0), forbiddenSlots, true);
+        if (bestSlot == null) {
+            bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, true);
         }
         return bestSlot;
     }
 
     /**
      * Method to find best placement slot for second Gantry when working with multiple gantries.
+     *
      * @param job
      * @param gantries
      * @param forbiddenSlots
      * @return
      */
-    public Slot findBestSlotSecondGantry(Job job, List<Gantry> gantries, Set<Slot> forbiddenSlots, boolean precedingJob, int refX){
+    public Slot findBestSlotSecondGantry(Job job, List<Gantry> gantries, Set<Slot> forbiddenSlots, boolean precedingJob, int refX) {
         int maxX;
-        if(precedingJob) maxX=refX;
-        else maxX=findMaxX(gantries.get(0));
-        Slot bestSlot=tryFindBestSlotLeftRightToX(maxX+20,gantries.get(0),forbiddenSlots, false);
-        if(bestSlot==null){
-            bestSlot=tryFindBestSlotLeftRightToX(outputSlot.getCenterX(),gantries.get(0),forbiddenSlots, false);
+        if (precedingJob) maxX = refX;
+        else maxX = findMaxX(gantries.get(0));
+        Slot bestSlot = tryFindBestSlotLeftRightToX(maxX + 20, gantries.get(0), forbiddenSlots, false);
+        if (bestSlot == null) {
+            bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, false);
         }
         return bestSlot;
     }
 
-    public Slot tryFindBestSlotLeftRightToX(int x, Gantry gantry, Set<Slot> forbiddenSlots, boolean leftRight){
+    public Slot tryFindBestSlotLeftRightToX(int x, Gantry gantry, Set<Slot> forbiddenSlots, boolean leftRight) {
         int yArray = (gantry.getCurrentY() - 5) / 10;
-        int arrayCounter=0;
-        while (arrayCounter!=yDimension) {
+        int arrayCounter = 0;
+        while (arrayCounter != yDimension) {
             for (Slot slot : slotArrayYDimension.get(yArray)) {
                 //when an item is moved out of relocation purposes, the slot above may never be the destination slot
                 if (slot.getItem() == null) {
                     //forbidden slots== null -> never a problem
                     //forbiddenslots!=null -> check if it doesn't contain slot.
                     if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
-                        if(leftRight && slot.getCenterX()<x)return slot;
-                        else if(!leftRight &&slot.getCenterX()>x) return slot;
+                        if (leftRight && slot.getCenterX() < x) return slot;
+                        else if (!leftRight && slot.getCenterX() > x) return slot;
                     }
 
                 }
@@ -177,20 +179,22 @@ public class Slots {
     }
 
     private int findMinX(Gantry gantry) {
-        if(gantry.getCurrentJob()!=null&& gantry.getCurrentJob().getPlace()!=null)return Math.min(gantry.getCurrentX(), gantry.getCurrentJob().getPlace().getSlot().getCenterX());
+        if (gantry.getCurrentJob() != null && gantry.getCurrentJob().getPlace() != null)
+            return Math.min(gantry.getCurrentX(), gantry.getCurrentJob().getPlace().getSlot().getCenterX());
         else return gantry.getCurrentX();
     }
 
     private int findMaxX(Gantry gantry) {
-        if(gantry.getCurrentJob()!=null && gantry.getCurrentJob().getPlace()!=null) return Math.max(gantry.getCurrentX(), gantry.getCurrentJob().getPlace().getSlot().getCenterX());
+        if (gantry.getCurrentJob() != null && gantry.getCurrentJob().getPlace() != null)
+            return Math.max(gantry.getCurrentX(), gantry.getCurrentJob().getPlace().getSlot().getCenterX());
         else return gantry.getCurrentX();
     }
 
-    public int findSuitableGantry(Job job, List<Gantry> gantries, int refX, int refY){
-        if(gantries.size()==1 || job.getPickup().getSlot().getCenterX()<refX)return 0;
-        if(job.getPickup().getSlot().getCenterX()>refX) return 1;
-        if(job.getPickup().getSlot().getCenterX()==refX){
-            if (refX<=maxX/2)return 0;
+    public int findSuitableGantry(Job job, List<Gantry> gantries, int refX, int refY) {
+        if (gantries.size() == 1 || job.getPickup().getSlot().getCenterX() < refX) return 0;
+        if (job.getPickup().getSlot().getCenterX() > refX) return 1;
+        if (job.getPickup().getSlot().getCenterX() == refX) {
+            if (refX <= maxX / 2) return 0;
             else return 1;
         }
         //default
@@ -281,9 +285,8 @@ public class Slots {
     }
 
     /**
-     *
      * @param slot
-     * @return
+     * @return List containing all slots with an item stacked above the given slot
      */
     public List<Slot> getStackedSlots(Slot slot) {
         // the list we'll return

@@ -98,8 +98,6 @@ public class Solution {
         if (jobToSolve.getPickup().getSlot() == null) {
             jobToSolve.getPickup().setSlot(slot);
         }
-        int refX = slot.getCenterX();
-        int refY = slot.getCenterY();
 
         //finding stacked items
         List<Slot> stackedItems = slots.getStackedItemSlots(slot);
@@ -111,19 +109,14 @@ public class Solution {
                 job.getPickup().setSlot(slt);
                 precedingJobs.addFirst(job);
             }
-            for (Job job : precedingJobs) {
-                int gantryIndex = slots.findSuitableGantry(job, gantries, refX, refY);
-                solvePrecedingJob(job, gantryIndex, refX);
-            }
-            precedingJobs.clear();
+            precedingJobs.addLast(jobToSolve);
+        }else{
+            slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
+            //execute output job.
+            executeJob(jobToSolve, gantries.get(gantries.size() - 1));
+            System.out.println(jobToSolve + "time: " + time);
         }
 
-        //get last crane: last crane always has to perform output jobs.
-        Gantry gantry = gantries.get(gantries.size() - 1);
-        slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
-        //execute output job.
-        executeJob(jobToSolve, gantry);
-        System.out.println(jobToSolve + "time: " + time);
     }
 
     /**
@@ -224,30 +217,30 @@ public class Solution {
 
     }
 
-    private int setToNextSafeTime() {
-        int shortestTime = Integer.MAX_VALUE;
+    /*
+    private int setToNextSafeTime(){
+        int shortestTime=Integer.MAX_VALUE;
         //todo: check all gantries, when one is idle, check pos, if save, move tim to that position
-        for (Gantry gantry : gantries) {
-            if (gantry.getCurrentJob() != null) {
+        for(Gantry gantry: gantries){
+            if(gantry.getCurrentJob()!=null){
                 if (gantry.getCurrentJob().getRemainingTime() < shortestTime) {
                     shortestTime = gantry.getCurrentJob().getRemainingTime();
                 }
             }
         }
 
-        int safeTime = findMaxSafeTime(shortestTime);
+        int safeTime= findMaxSafeTime(shortestTime);
 
     }
+    */
 
-    private boolean checkLoop() {
-        if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty()) {
+    private boolean checkLoop(){
+        if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty()){
             return false;
         }
         return true;
     }
 
-    private int findMaxSafeTime(int time) {
 
-    }
 
 }

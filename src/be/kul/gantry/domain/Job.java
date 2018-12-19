@@ -58,7 +58,6 @@ public class Job {
         pickedup = false;
     }
 
-
     public Set<Slot> getForbiddenSlots() {
         return forbiddenSlots;
     }

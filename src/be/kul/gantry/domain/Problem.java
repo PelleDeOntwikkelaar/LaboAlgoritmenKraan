@@ -252,7 +252,7 @@ public class Problem {
                 double xSpeed = ((Double) gantry.get("xSpeed")).doubleValue();
                 double ySpeed = ((Double) gantry.get("ySpeed")).doubleValue();
 
-                Gantry g = new Gantry(id, xMin, xMax, startX, startY, xSpeed, ySpeed);
+                Gantry g = new Gantry(id, xMin, xMax, startX, startY, xSpeed, ySpeed,safetyDist);
                 gantryList.add(g);
             }
 

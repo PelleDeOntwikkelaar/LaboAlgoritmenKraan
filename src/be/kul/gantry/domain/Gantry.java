@@ -3,6 +3,7 @@ package be.kul.gantry.domain;
 import be.kul.gantry.Extra.CSVFileWriter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Wim on 27/04/2015.
@@ -14,6 +15,7 @@ public class Gantry {
     private final int startX, startY;
     private final double xSpeed;
     private final double ySpeed;
+    private final int safetyGap;
 
     private int currentX;
     private int currentY;
@@ -36,7 +38,8 @@ public class Gantry {
     public Gantry(int id,
                   int xMin, int xMax,
                   int startX, int startY,
-                  double xSpeed, double ySpeed) {
+                  double xSpeed, double ySpeed,
+                  int safetyGap) {
         this.id = id;
         this.xMin = xMin;
         this.xMax = xMax;
@@ -44,6 +47,7 @@ public class Gantry {
         this.startY = startY;
         this.xSpeed = xSpeed;
         this.ySpeed = ySpeed;
+        this.safetyGap=safetyGap;
 
         this.currentX = startX;
         this.currentY = startY;
@@ -160,11 +164,22 @@ public class Gantry {
         currentY = centerY;
     }
 
-    public void moveCraneToNewPosition(double currentTime) {
-        int xInt = moveToX - currentX;
-        int yInt = moveToY - currentY;
+    public void moveCraneToNewPosition(double currentTime, Gantry otherGantry){
+        int xInt=moveToX-currentX;
+        int yInt=moveToY-currentY;
 
-        if (makeTransition) {
+        if(id==1 && !calculateOtherGantryBoundarie(true,otherGantry)){
+            mode=gantryMode.WAIT;
+            printStatus(currentTime);
+        }else{
+            posUpdate(0,xInt,moveToX,xSpeed);
+            posUpdate(1,yInt,moveToY,ySpeed);
+            System.out.println("posupdate: id "+id );
+
+            checkForMoveTransition(currentTime, otherGantry);
+        }
+
+        /*if (makeTransition) {
             posUpdate(0, xInt, moveToX, xSpeed);
             posUpdate(1, yInt, moveToY, ySpeed);
             System.out.println("posupdate: id " + id);
@@ -172,13 +187,12 @@ public class Gantry {
             checkForMoveTransition(currentTime);
         } else {
             makeTransition = true;
-        }
-
+        }*/
 
 
     }
 
-    private void checkForMoveTransition(double currentTime) {
+    private void checkForMoveTransition(double currentTime, Gantry otherGantry) {
 
         if (currentJob.getPickup().getSlot().getCenterX() == currentX && currentJob.getPickup().getSlot().getCenterY() == currentY) {
             mode = gantryMode.PICKUP;
@@ -191,23 +205,31 @@ public class Gantry {
         }
     }
 
-    public void checkForPickUpTransition(double currentTime) {
-        if (pickUpPlaceCountDown == 0) {
-            System.out.println("pickupDone: id " + id);
-            moveToX = currentJob.getPlace().getSlot().getCenterX();
-            moveToY = currentJob.getPlace().getSlot().getCenterY();
+    public void checkForPickUpTransition(double currentTime, Gantry otherGantry){
+        if (pickUpPlaceCountDown==0){
+            System.out.println("pickupDone: id "+id );
+            moveToX=currentJob.getPlace().getSlot().getCenterX();
+            moveToY=currentJob.getPlace().getSlot().getCenterY();
             currentJob.pickedUp();
-            mode = gantryMode.MOVE;
-            makeTransition = false;
-            slots.removeItemFromSlot(currentJob.getItem(), currentJob.getPickup().getSlot());
+            slots.removeItemFromSlot(currentJob.getItem(),currentJob.getPickup().getSlot());
             printStatus(currentTime);
+            if((id==1 && !calculateOtherGantryBoundarie(true,otherGantry))|| id==0){
+                mode=gantryMode.MOVE;
+                makeTransition = false;
+                printStatus(currentTime);
+            }else{
+                mode=gantryMode.WAIT;
+            }
+
+
+
         }
     }
 
-    public void checkForPlaceTransition(double currentTime) {
-        if (pickUpPlaceCountDown == 0) {
-            System.out.println("placeDone: id " + id);
-            slots.addItemToSlot(currentJob.getItem(), currentJob.getPlace().getSlot());
+    public void checkForPlaceTransition(double currentTime, Gantry otherGantry){
+        if (pickUpPlaceCountDown==0){
+            System.out.println("placeDone: id "+id );
+            slots.addItemToSlot(currentJob.getItem(),currentJob.getPlace().getSlot());
             currentJob.placed();
             printStatus(currentTime);
             currentJob = null;
@@ -215,20 +237,31 @@ public class Gantry {
         }
     }
 
-    public void checkForIdleTransition(double currentTime) {
-        if (mode == gantryMode.IDLE && currentJob != null) {
-            System.out.println("idle: id " + id);
-            if (currentX == moveToX && currentY == moveToY) {
-                pickUpPlaceCountDown = pickUpPlaceDuration;
-                mode = gantryMode.PICKUP;
+    public void checkForIdleTransition(double currentTime, Gantry otherGantry){
+        if(mode==gantryMode.IDLE && currentJob!=null){
+            System.out.println("idle: id "+id );
+            if(currentX==moveToX &&currentY==moveToY){
+                pickUpPlaceCountDown=pickUpPlaceDuration;
+                mode=gantryMode.PICKUP;
                 printStatus(currentTime);
-            } else {
-                mode = gantryMode.MOVE;
-                makeTransition = false;
-                printStatus(currentTime);
+            }else{
+                if((id==1 && !calculateOtherGantryBoundarie(true,otherGantry))|| id==0){
+                    mode=gantryMode.MOVE;
+                    makeTransition = false;
+                    printStatus(currentTime);
+                }
             }
         }
 
+    }
+
+    private void checkForWaitTransition(double currentTime, Gantry otherGantry) {
+        if(currentJob==null){
+            mode=gantryMode.IDLE;
+        }else if(id==1 && !calculateOtherGantryBoundarie(true,otherGantry)){
+            mode=gantryMode.MOVE;
+            printStatus(currentTime);
+        }
     }
 
     private void posUpdate(int currentIndex, int interval, int moveTo, double speed) {
@@ -285,23 +318,48 @@ public class Gantry {
         moveToY = this.currentJob.getPickup().getSlot().getCenterY();
     }
 
-    public void performTimeStep(double time) {
-
-        if (mode == gantryMode.MOVE) {
-            moveCraneToNewPosition(time);
-        } else if (mode == gantryMode.PICKUP) {
+    public void performTimeStep(double time, List<Gantry> gantries) {
+        Gantry otherGantry = null;
+        for (Gantry gantry : gantries) {
+            if (gantry != this) {
+                otherGantry = gantry;
+            }
+        }
+        if(mode==gantryMode.WAIT){
+            checkForWaitTransition(time, otherGantry);
+        }else if(mode==gantryMode.MOVE){
+            moveCraneToNewPosition(time, otherGantry);
+        }else if(mode==gantryMode.PICKUP){
             pickUpPlaceCountDown--;
-            if (pickUpPlaceCountDown == 0) {
-                checkForPickUpTransition(time);
+            if(pickUpPlaceCountDown==0){
+                checkForPickUpTransition(time, otherGantry);
             }
         } else if (mode == gantryMode.PLACE) {
             pickUpPlaceCountDown--;
-            if (pickUpPlaceCountDown == 0) {
-                checkForPlaceTransition(time);
+            if(pickUpPlaceCountDown==0){
+                checkForPlaceTransition(time, otherGantry);
             }
-        } else if (mode == gantryMode.IDLE) {
-            checkForIdleTransition(time);
+        }else if(mode==gantryMode.IDLE){
+            checkForIdleTransition(time, otherGantry);
         }
+    }
+
+    private boolean calculateOtherGantryBoundarie(boolean lessGreater, Gantry otherGantry){
+        int minX=getMinimalX(otherGantry);
+        int maxX=getMaximalX(otherGantry);
+        if(lessGreater){
+            if(moveToX>=maxX+safetyGap) return true;
+        }else{
+            if(moveToX<=minX-safetyGap) return true;
+        }
+        return false;
+    }
+
+    private int getMinimalX(Gantry otherGantry) {
+        return Math.min(otherGantry.currentX, otherGantry.moveToX);
+    }
+    private int getMaximalX(Gantry otherGantry) {
+        return Math.max(otherGantry.currentX, otherGantry.moveToX);
     }
 
     public enum gantryMode {

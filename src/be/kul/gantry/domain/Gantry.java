@@ -10,8 +10,8 @@ public class Gantry {
     private final int id;
     private final int xMin, xMax;
     private final int startX, startY;
-    private final Integer xSpeed;
-    private final Integer ySpeed;
+    private final double xSpeed;
+    private final double ySpeed;
 
     private int currentX;
     private int currentY;
@@ -29,7 +29,7 @@ public class Gantry {
     public Gantry(int id,
                   int xMin, int xMax,
                   int startX, int startY,
-                  Integer xSpeed, Integer ySpeed) {
+                  double xSpeed, double ySpeed) {
         this.id = id;
         this.xMin = xMin;
         this.xMax = xMax;
@@ -228,6 +228,7 @@ public class Gantry {
         stb.append(currentY);
         stb.append(";");
 
+        // dit moet volgens mij nog aangepast worden
         if (currentJob.getItem() == null) stb.append("null");
         else stb.append(currentJob.getItem().getId());
         stb.append(";");

@@ -184,22 +184,38 @@ public class Solution {
              * assign new job to idle gantry
              * todo: for inputGantry prioritize digging over input jobs
              * todo: extra*/
-            //for (Job job : currentJobs) {
+
             for (Gantry gantry : gantries) {
                 Job job = gantry.getCurrentJob();
                 if (job == null) {
                     if (!precedingJobs.isEmpty()) {
-                        // todo: assign preceding job
+                        // assign preceding job
+                        gantry.setCurrentJob(precedingJobs.pollFirst());
+                        solvePrecedingJob(job, gantry.getId(), gantry.getCurrentX());
                     } else {
-                        // todo: assign in- or output job to gantry
+                        if (gantry.getId() == 0) {
+                            // assign input job
+                            gantry.setCurrentJob(inputQueue.poll());
+                        } else {
+                            // todo: assign output job
+
+                        }
                     }
                 }
 
-                if (globalTime == job.getStartingTimePlace() ||
-                        globalTime == job.getStartingTimePickup() ||
-                        globalTime == job.getStartingTimePickup() + job.getPickup().getTime() ||
-                        globalTime == job.getStartingTimePlace() + job.getPlace().getTime()
-                ) {
+                if (globalTime == job.getStartingTimePickup()) {
+                    gantry.printStatus(globalTime);
+                } else if (globalTime == job.getStartingTimePlace()) {
+                    gantry.printStatus(globalTime);
+                } else if (globalTime == job.getStartingTimePickup() + job.getPickup().getTime()) {
+                    gantry.moveCrane(job.getPickup().getSlot().getCenterX(), job.getPickup().getSlot().getCenterY());
+                    gantry.printStatus(globalTime);
+                } else if (globalTime == job.getStartingTimePlace() + job.getPlace().getTime()) {
+                    gantry.moveCrane(job.getPlace().getSlot().getCenterX(), job.getPlace().getSlot().getCenterY());
+                    gantry.printStatus(globalTime);
+                } else if (globalTime == job.getStartingTimePickup() + job.getPickup().getTime() + problem.getPickupPlaceDuration()) {
+                    gantry.printStatus(globalTime);
+                } else if (globalTime == job.getStartingTimePlace() + job.getPlace().getTime() + problem.getPickupPlaceDuration()) {
                     gantry.printStatus(globalTime);
                 }
 
@@ -231,8 +247,8 @@ public class Solution {
     }
     */
 
-    private boolean checkLoop(){
-        if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty()){
+    private boolean checkLoop() {
+        if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty()) {
             return false;
         }
         return true;

@@ -16,13 +16,8 @@ public class Job {
 
     private final Item item;
 
-    private double startingTimePickup;
-    private double startingTimePlace;
 
     private Set<Slot> forbiddenSlots;
-
-    //todo: calculate position of each gantry for each startingTime unit
-    //todo: check position of the other gantry and correct startingTime and position if necessary
 
     public Job(int id, Item c, Slot from, Slot to) {
         this.id = id;
@@ -49,21 +44,6 @@ public class Job {
         return item;
     }
 
-    public double getStartingTimePickup() {
-        return startingTimePickup;
-    }
-
-    public void setStartingTimePickup(double startingTimePickup) {
-        this.startingTimePickup = startingTimePickup;
-    }
-
-    public double getStartingTimePlace() {
-        return startingTimePlace;
-    }
-
-    public void setStartingTimePlace(double startingTimePlace) {
-        this.startingTimePlace = startingTimePlace;
-    }
 
     public Set<Slot> getForbiddenSlots() {
         return forbiddenSlots;
@@ -75,36 +55,9 @@ public class Job {
 
     @Override
     public String toString() {
-        return String.format("J%d move %d from %s to %s in %f", id, item.getId(), pickup.slot, place.slot, startingTimePickup);
+        return String.format("J%d move %d from %s to %s in %f", id, item.getId(), pickup.slot, place.slot);
     }
 
-    public void performTask(Gantry gantry, Task task) {
-        task.calculateTime(gantry);
-        gantry.moveCrane(task.slot.getCenterX(), task.slot.getCenterY());
-    }
-
-    public void printStatus(Gantry gantry, CSVFileWriter csvFileWriter, double totalTime, TaskType type) {
-        StringBuilder stb1 = new StringBuilder();
-        StringBuilder stb2 = new StringBuilder();
-        stb1.append(gantry.printStatus(totalTime));
-        stb2.append(gantry.printStatus(totalTime + 10));
-
-        if (type == TaskType.PICKUP) {
-            stb1.append("null");
-            stb2.append(item.getId());
-
-        } else {
-            stb1.append(item.getId());
-            stb2.append("null");
-        }
-        stb1.append(";");
-        stb2.append(";");
-        stb1.append("\n");
-        stb2.append("\n");
-        csvFileWriter.add(stb1);
-        csvFileWriter.add(stb2);
-
-    }
 
     public class Task {
         private final int id;

@@ -52,6 +52,7 @@ public class Solution {
         for(Gantry gantry: gantries){
             gantry.setPickUpPlaceDuration(problem.getPickupPlaceDuration());
             gantry.setSlots(slots);
+            gantry.setCsvFileWriter(csvFileWriter);
         }
         time = 0;
 

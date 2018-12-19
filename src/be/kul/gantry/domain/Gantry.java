@@ -1,5 +1,7 @@
 package be.kul.gantry.domain;
 
+import be.kul.gantry.Extra.CSVFileWriter;
+
 import java.util.ArrayList;
 
 /**
@@ -26,6 +28,8 @@ public class Gantry {
 
     private Slots slots;
 
+    private CSVFileWriter csvFileWriter;
+
 
 
     public Gantry(int id,
@@ -49,6 +53,9 @@ public class Gantry {
         this.slots = slots;
     }
 
+    public void setCsvFileWriter(CSVFileWriter csvFileWriter) {
+        this.csvFileWriter = csvFileWriter;
+    }
 
     public int getId() {
         return id;
@@ -230,7 +237,7 @@ public class Gantry {
         }
     }
 
-    public String printStatus(double totalTime) {
+    public void printStatus(double totalTime) {
         StringBuilder stb = new StringBuilder();
 
         stb.append(id);
@@ -251,7 +258,7 @@ public class Gantry {
 
         stb.append("\n");
 
-        return stb.toString();
+        csvFileWriter.add( stb);
 
     }
 

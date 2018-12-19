@@ -60,8 +60,6 @@ public class Solution {
         globalTime = 0;
     }
 
-
-
     private Job solveInputJob(Job inputJobToSolve) {
         Gantry gantry = gantries.get(0);
         Slot bestFit = null;
@@ -145,14 +143,15 @@ public class Solution {
         Boolean continueLoop = true;
         while (continueLoop) {
 
-            /*check currentJobs
-             * on time print part of job
-             * if job is done => remove job from list, set gantry to idle
-             * assign new job to idle gantry
-             * todo: for inputGantry prioritize digging over input jobs
-             * todo: extra*/
+            //todo: wait times & safetygap.
 
             for (Gantry gantry: gantries) {
+                Gantry otherGantry = null;
+                for (Gantry gantry1 : gantries) {
+                    if (gantry1 != gantry) {
+                        otherGantry = gantry;
+                    }
+                }
                 //if gantry is idle -> assign next job
                 if (gantry.getMode()== Gantry.gantryMode.IDLE) {
                     if (!precedingJobs.isEmpty()) {
@@ -165,7 +164,7 @@ public class Solution {
                             nextJob=solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
                             gantry.setCurrentJob(nextJob);
                         }
-                        gantry.checkForIdleTransition(globalTime);
+                        gantry.checkForIdleTransition(globalTime,otherGantry);
                     }
                     if(gantry.getMode()== Gantry.gantryMode.IDLE) {
                         //if gantry == input gantry -> assign input job, else -> output job.
@@ -189,12 +188,13 @@ public class Solution {
                             }
 
                         }
-                        gantry.checkForIdleTransition(globalTime);
+                        gantry.checkForIdleTransition(globalTime, otherGantry);
                     }
                 }
+
                 //job is assigned, now perform action on time step.
 
-                gantry.performTimeStep(globalTime);
+                gantry.performTimeStep(globalTime, gantries);
 
             }
             System.out.println(globalTime);
@@ -209,6 +209,7 @@ public class Solution {
         if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty()
                 && gantries.get(0).getMode()== Gantry.gantryMode.IDLE
                 && gantries.get(1).getMode()== Gantry.gantryMode.IDLE) {
+
             return false;
         }
         return true;

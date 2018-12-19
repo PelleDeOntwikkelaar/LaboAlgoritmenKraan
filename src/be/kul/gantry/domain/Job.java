@@ -2,6 +2,8 @@ package be.kul.gantry.domain;
 
 import be.kul.gantry.Extra.CSVFileWriter;
 
+import java.util.Set;
+
 /**
  * Created by Wim on 12/05/2015.
  */
@@ -11,14 +13,12 @@ public class Job {
 
     private final Task pickup;
     private final Task place;
+    private boolean pickedup;
 
     private final Item item;
 
-    private double startingTimePickup;
-    private double startingTimePlace;
 
-    //todo: calculate position of each gantry for each startingTime unit
-    //todo: check position of the other gantry and correct startingTime and position if necessary
+    private Set<Slot> forbiddenSlots;
 
     public Job(int id, Item c, Slot from, Slot to) {
         this.id = id;
@@ -27,6 +27,7 @@ public class Job {
         this.place = new Task(id * 2 + 1, TaskType.PLACE);
         this.pickup.slot = from;
         this.place.slot = to;
+        pickedup=false;
     }
 
     public int getId() {
@@ -45,54 +46,32 @@ public class Job {
         return item;
     }
 
-    public double getStartingTimePickup() {
-        return startingTimePickup;
+    public boolean isPickedup() {
+        return pickedup;
     }
 
-    public void setStartingTimePickup(double startingTimePickup) {
-        this.startingTimePickup = startingTimePickup;
+    public void pickedUp(){
+        pickedup=true;
     }
 
-    public double getStartingTimePlace() {
-        return startingTimePlace;
+    public void placed(){
+        pickedup=false;
     }
 
-    public void setStartingTimePlace(double startingTimePlace) {
-        this.startingTimePlace = startingTimePlace;
+
+    public Set<Slot> getForbiddenSlots() {
+        return forbiddenSlots;
+    }
+
+    public void setForbiddenSlots(Set<Slot> forbiddenSlots) {
+        this.forbiddenSlots = forbiddenSlots;
     }
 
     @Override
     public String toString() {
-        return String.format("J%d move %d from %s to %s in %f", id, item.getId(), pickup.slot, place.slot, startingTimePickup);
+        return String.format("J%d move %d from %s to %s in %f", id, item.getId(), pickup.slot, place.slot);
     }
 
-    public void performTask(Gantry gantry, Task task) {
-        task.calculateTime(gantry);
-        gantry.moveCrane(task.slot.getCenterX(), task.slot.getCenterY());
-    }
-
-    public void printStatus(Gantry gantry, CSVFileWriter csvFileWriter, double totalTime, TaskType type) {
-        StringBuilder stb1 = new StringBuilder();
-        StringBuilder stb2 = new StringBuilder();
-        stb1.append(gantry.printStatus(totalTime));
-        stb2.append(gantry.printStatus(totalTime + 10));
-
-        if (type == TaskType.PICKUP) {
-            stb1.append("null");
-            stb2.append(item.getId());
-
-        } else {
-            stb1.append(item.getId());
-            stb2.append("null");
-        }
-        stb1.append(";");
-        stb2.append(";");
-        stb1.append("\n");
-        stb2.append("\n");
-        csvFileWriter.add(stb1);
-        csvFileWriter.add(stb2);
-
-    }
 
     public class Task {
         private final int id;

@@ -1,5 +1,7 @@
 package be.kul.gantry.domain;
 
+import be.kul.gantry.Extra.CSVFileWriter;
+
 import java.util.ArrayList;
 
 /**
@@ -24,6 +26,10 @@ public class Gantry {
     private int pickUpPlaceCountDown;
     private int pickUpPlaceDuration;
 
+    private Slots slots;
+
+    private CSVFileWriter csvFileWriter;
+
 
 
     public Gantry(int id,
@@ -40,6 +46,15 @@ public class Gantry {
 
         this.currentX = startX;
         this.currentY = startY;
+        mode=gantryMode.IDLE;
+    }
+
+    public void setSlots(Slots slots) {
+        this.slots = slots;
+    }
+
+    public void setCsvFileWriter(CSVFileWriter csvFileWriter) {
+        this.csvFileWriter = csvFileWriter;
     }
 
     public int getId() {
@@ -147,6 +162,7 @@ public class Gantry {
 
         posUpdate(0,xInt,moveToX,xSpeed);
         posUpdate(1,yInt,moveToY,ySpeed);
+        System.out.println("posupdate: id "+id );
 
         checkForMoveTransition(currentTime);
 
@@ -167,31 +183,40 @@ public class Gantry {
 
     public void checkForPickUpTransition(double currentTime){
         if (pickUpPlaceCountDown==0){
+            System.out.println("pickupDone: id "+id );
             moveToX=currentJob.getPlace().getSlot().getCenterX();
             moveToY=currentJob.getPlace().getSlot().getCenterY();
+            currentJob.pickedUp();
             mode=gantryMode.MOVE;
-            //todo: item moet verwijderd worden uit slot
+            slots.removeItemFromSlot(currentJob.getItem(),currentJob.getPickup().getSlot());
             printStatus(currentTime);
         }
     }
 
     public void checkForPlaceTransition(double currentTime){
         if (pickUpPlaceCountDown==0){
-            mode=gantryMode.IDLE;
-            //todo: item moet verwijderd worden uit slot
+            System.out.println("placeDone: id "+id );
+            slots.addItemToSlot(currentJob.getItem(),currentJob.getPlace().getSlot());
+            currentJob.placed();
             printStatus(currentTime);
+            currentJob=null;
+            mode=gantryMode.IDLE;
         }
     }
 
     public void checkForIdleTransition(double currentTime){
-        if(currentX!=moveToX &&currentY!=moveToY){
-            mode=gantryMode.MOVE;
-            printStatus(currentTime);
+        if(mode==gantryMode.IDLE && currentJob!=null){
+            System.out.println("idle: id "+id );
+            if(currentX==moveToX &&currentY==moveToY){
+                pickUpPlaceCountDown=pickUpPlaceDuration;
+                mode=gantryMode.PICKUP;
+                printStatus(currentTime);
+            }else{
+                mode=gantryMode.MOVE;
+                printStatus(currentTime);
+            }
         }
-    }
 
-    public void decreasePickupPlaceCountDown(){
-        pickUpPlaceCountDown--;
     }
 
     private void posUpdate(int currentIndex, int interval, int moveTo, double speed){
@@ -213,7 +238,7 @@ public class Gantry {
         }
     }
 
-    public String printStatus(double totalTime) {
+    public void printStatus(double totalTime) {
         StringBuilder stb = new StringBuilder();
 
         stb.append(id);
@@ -228,14 +253,13 @@ public class Gantry {
         stb.append(currentY);
         stb.append(";");
 
-        // dit moet volgens mij nog aangepast worden
-        if (currentJob.getItem() == null) stb.append("null");
+        if (!currentJob.isPickedup() ) stb.append("null");
         else stb.append(currentJob.getItem().getId());
         stb.append(";");
 
         stb.append("\n");
 
-        return stb.toString();
+        csvFileWriter.add( stb);
 
     }
 
@@ -245,6 +269,27 @@ public class Gantry {
 
     public void setCurrentJob(Job currentJob) {
         this.currentJob = currentJob;
+        moveToX=this.currentJob.getPickup().getSlot().getCenterX();
+        moveToY=this.currentJob.getPickup().getSlot().getCenterY();
+    }
+
+    public void performTimeStep(double time) {
+
+        if(mode==gantryMode.MOVE){
+            moveCraneToNewPosition(time);
+        }else if(mode==gantryMode.PICKUP){
+            pickUpPlaceCountDown--;
+            if(pickUpPlaceCountDown==0){
+                checkForPickUpTransition(time);
+            }
+        }else if(mode==gantryMode.PLACE){
+            pickUpPlaceCountDown--;
+            if(pickUpPlaceCountDown==0){
+                checkForPlaceTransition(time);
+            }
+        }else if(mode==gantryMode.IDLE){
+            checkForIdleTransition(time);
+        }
     }
 
     public enum gantryMode {

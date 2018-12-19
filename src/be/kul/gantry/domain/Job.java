@@ -2,6 +2,8 @@ package be.kul.gantry.domain;
 
 import be.kul.gantry.Extra.CSVFileWriter;
 
+import java.util.Set;
+
 /**
  * Created by Wim on 12/05/2015.
  */
@@ -16,6 +18,8 @@ public class Job {
 
     private double startingTimePickup;
     private double startingTimePlace;
+
+    private Set<Slot> forbiddenSlots;
 
     //todo: calculate position of each gantry for each startingTime unit
     //todo: check position of the other gantry and correct startingTime and position if necessary
@@ -59,6 +63,14 @@ public class Job {
 
     public void setStartingTimePlace(double startingTimePlace) {
         this.startingTimePlace = startingTimePlace;
+    }
+
+    public Set<Slot> getForbiddenSlots() {
+        return forbiddenSlots;
+    }
+
+    public void setForbiddenSlots(Set<Slot> forbiddenSlots) {
+        this.forbiddenSlots = forbiddenSlots;
     }
 
     @Override

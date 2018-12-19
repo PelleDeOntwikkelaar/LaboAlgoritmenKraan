@@ -10,8 +10,8 @@ public class Gantry {
     private final int id;
     private final int xMin, xMax;
     private final int startX, startY;
-    private final Integer xSpeed;
-    private final Integer ySpeed;
+    private final double xSpeed;
+    private final double ySpeed;
 
     private int currentX;
     private int currentY;
@@ -24,12 +24,14 @@ public class Gantry {
     private int pickUpPlaceCountDown;
     private int pickUpPlaceDuration;
 
+    private Slots slots;
+
 
 
     public Gantry(int id,
                   int xMin, int xMax,
                   int startX, int startY,
-                  Integer xSpeed, Integer ySpeed) {
+                  double xSpeed, double ySpeed) {
         this.id = id;
         this.xMin = xMin;
         this.xMax = xMax;
@@ -40,7 +42,13 @@ public class Gantry {
 
         this.currentX = startX;
         this.currentY = startY;
+        mode=gantryMode.IDLE;
     }
+
+    public void setSlots(Slots slots) {
+        this.slots = slots;
+    }
+
 
     public int getId() {
         return id;
@@ -147,6 +155,7 @@ public class Gantry {
 
         posUpdate(0,xInt,moveToX,xSpeed);
         posUpdate(1,yInt,moveToY,ySpeed);
+        System.out.println("posupdate: id "+id );
 
         checkForMoveTransition(currentTime);
 
@@ -167,32 +176,40 @@ public class Gantry {
 
     public void checkForPickUpTransition(double currentTime){
         if (pickUpPlaceCountDown==0){
+            System.out.println("pickupDone: id "+id );
             moveToX=currentJob.getPlace().getSlot().getCenterX();
             moveToY=currentJob.getPlace().getSlot().getCenterY();
             mode=gantryMode.MOVE;
-            //todo: item moet verwijderd worden uit slot
+            slots.removeItemFromSlot(currentJob.getItem(),currentJob.getPickup().getSlot());
             printStatus(currentTime);
         }
     }
 
     public void checkForPlaceTransition(double currentTime){
         if (pickUpPlaceCountDown==0){
-            mode=gantryMode.IDLE;
-            //todo: item moet verwijderd worden uit slot
+            System.out.println("placeDone: id "+id );
+            slots.addItemToSlot(currentJob.getItem(),currentJob.getPlace().getSlot());
             printStatus(currentTime);
+            currentJob=null;
+            mode=gantryMode.IDLE;
         }
     }
 
     public void checkForIdleTransition(double currentTime){
-        if(currentX!=moveToX &&currentY!=moveToY){
-            mode=gantryMode.MOVE;
-            printStatus(currentTime);
+        if(mode==gantryMode.IDLE && currentJob!=null){
+            System.out.println("idle: id "+id );
+            if(currentX==moveToX &&currentY==moveToY){
+                pickUpPlaceCountDown=pickUpPlaceDuration;
+                mode=gantryMode.PICKUP;
+                printStatus(currentTime);
+            }else{
+                mode=gantryMode.MOVE;
+                printStatus(currentTime);
+            }
         }
+
     }
 
-    public void decreasePickupPlaceCountDown(){
-        pickUpPlaceCountDown--;
-    }
 
     private void posUpdate(int currentIndex, int interval, int moveTo, double speed){
         ArrayList<Integer> current=new ArrayList<>();
@@ -244,6 +261,26 @@ public class Gantry {
 
     public void setCurrentJob(Job currentJob) {
         this.currentJob = currentJob;
+        moveToX=this.currentJob.getPickup().getSlot().getCenterX();
+        moveToY=this.currentJob.getPickup().getSlot().getCenterY();
+    }
+
+    public void performTimeStep(double time) {
+        if(mode==gantryMode.MOVE){
+            moveCraneToNewPosition(time);
+        }else if(mode==gantryMode.PICKUP){
+            pickUpPlaceCountDown--;
+            if(pickUpPlaceCountDown==0){
+                checkForPickUpTransition(time);
+            }
+        }else if(mode==gantryMode.PLACE){
+            pickUpPlaceCountDown--;
+            if(pickUpPlaceCountDown==0){
+                checkForPlaceTransition(time);
+            }
+        }else if(mode==gantryMode.IDLE){
+            checkForIdleTransition(time);
+        }
     }
 
     public enum gantryMode {

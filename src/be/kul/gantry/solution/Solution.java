@@ -51,6 +51,7 @@ public class Solution {
         gantries = problem.getGantries();
         for(Gantry gantry: gantries){
             gantry.setPickUpPlaceDuration(problem.getPickupPlaceDuration());
+            gantry.setSlots(slots);
         }
         time = 0;
 
@@ -58,45 +59,32 @@ public class Solution {
         globalTime = 0;
     }
 
-    public void solveNextJob() {
 
-        if ((!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) || outputQueue.isEmpty()) {
-            // if the item we want to extract isn't in storage we'll do an input job
-            if (!inputQueue.isEmpty()) {
-                jobToSolve = inputQueue.poll();
-                solveInputJob();
-            }
-        } else if (!outputQueue.isEmpty()) {
-            // solve an output job
-            jobToSolve = outputQueue.poll();
-            solveOutputJob();
-        }
-    }
 
-    private Job solveInputJob() {
+    private Job solveInputJob(Job inputJobToSolve) {
         Gantry gantry = gantries.get(0);
         Slot bestFit = null;
-        if (jobToSolve.getPlace().getSlot() == null) {
+        if (inputJobToSolve.getPlace().getSlot() == null) {
 
             if (gantries.size() == 1) {
                 //calculate drop off slot
                 bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(), null);
             } else {
                 //calculate drop off slot when working whit multiple gantries.
-                bestFit = slots.findBestSlotFirstGantry(jobToSolve, gantries, null, false, 0);
+                bestFit = slots.findBestSlotFirstGantry(inputJobToSolve, gantries, null, false, 0);
             }
             //update Job parameters
-            jobToSolve.getPlace().setSlot(bestFit);
+            inputJobToSolve.getPlace().setSlot(bestFit);
         }
 
-        return jobToSolve;
+        return inputJobToSolve;
     }
 
-    private Job solveOutputJob() {
+    private Job solveOutputJob(Job nexOutputJobToSolve) {
         //pre solving work: finding item, computing stacked slots,..
-        Slot slot = slots.findSlotByItem(jobToSolve.getItem());
-        if (jobToSolve.getPickup().getSlot() == null) {
-            jobToSolve.getPickup().setSlot(slot);
+        Slot slot = slots.findSlotByItem(nexOutputJobToSolve.getItem());
+        if (nexOutputJobToSolve.getPickup().getSlot() == null) {
+            nexOutputJobToSolve.getPickup().setSlot(slot);
         }
 
         //finding stacked items
@@ -107,12 +95,13 @@ public class Solution {
             for (Slot slt : stackedItems) {
                 Job job = new Job(jobNumber++, slt.getItem(), slt, null);
                 job.getPickup().setSlot(slt);
+                job.setForbiddenSlots(slots.findForbiddenSlots(nexOutputJobToSolve.getPickup().getSlot()));
                 precedingJobs.addFirst(job);
             }
-            precedingJobs.addLast(jobToSolve);
+            precedingJobs.addLast(nexOutputJobToSolve);
             return null;
         }else{
-            return jobToSolve;
+            return nexOutputJobToSolve;
         }
 
     }
@@ -125,7 +114,7 @@ public class Solution {
      */
     private Job solvePrecedingJob(Job job, int gantryIndex, int refX) {
         Slot pickupSlot = job.getPickup().getSlot();
-        Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
+        Set<Slot> forbiddenSlots = job.getForbiddenSlots();
         Slot bestFit;
         if (job.getPlace().getSlot()==null){
             if (gantries.size() == 1) {
@@ -142,38 +131,11 @@ public class Solution {
         return job;
     }
 
-    /**
-     * Method that performs a job excecution in two different steps.
-     * 1) Time calculation for crane movement and print crane movement.
-     * 2) Time calculation of pickup/delivery and dor it and print specifics
-     *
-     * @param job    Type Job: Job to complete in this method.
-     * @param gantry Type Gantry: Crane that will perform the given job.
-     */
-    public void executeJob(Job job, Gantry gantry) {
-
-        //move gantry to pickup slot and perform time analysis
-        job.performTask(gantry, job.getPickup());
-        time += job.getPickup().getTime();
-        //print status after pickup task
-        job.printStatus(gantry, csvFileWriter, time, Job.TaskType.PICKUP);
-        time += 10;
-
-        //move gantry to place slot and perform time analysis
-        job.performTask(gantry, job.getPlace());
-        time += job.getPlace().getTime();
-        //print status after place task
-        job.printStatus(gantry, csvFileWriter, time, Job.TaskType.PLACE);
-        time += 10;
-    }
 
     /**
      * Method with a while loop that keeps on solving jobs until there are none left.
      */
     public void solve() {
-        /*while (!(inputQueue.isEmpty() && outputQueue.isEmpty() && jobToSolve == null && precedingJobs.isEmpty())) {
-            solveNextJob();
-        }*/
 
         Boolean continueLoop = true;
         while (continueLoop) {
@@ -185,70 +147,63 @@ public class Solution {
              * todo: for inputGantry prioritize digging over input jobs
              * todo: extra*/
 
-            for (Gantry gantry : gantries) {
-                Job job = gantry.getCurrentJob();
-                if (job == null) {
+            for (Gantry gantry: gantries) {
+                //if gantry is idle -> assign next job
+                if (gantry.getMode()== Gantry.gantryMode.IDLE) {
                     if (!precedingJobs.isEmpty()) {
                         // assign preceding job
-                        gantry.setCurrentJob(precedingJobs.pollFirst());
-                        solvePrecedingJob(job, gantry.getId(), gantry.getCurrentX());
-                    } else {
+                        Job nextJob=precedingJobs.poll();
+
+                        if(nextJob.getPlace().getSlot()!=null && gantry.getId()==1){
+                            gantry.setCurrentJob(nextJob);
+                        }else if(nextJob.getPlace().getSlot()==null){
+                            nextJob=solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
+                            gantry.setCurrentJob(nextJob);
+                        }
+                        gantry.checkForIdleTransition(globalTime);
+                    }
+                    if(gantry.getMode()== Gantry.gantryMode.IDLE) {
+                        //if gantry == input gantry -> assign input job, else -> output job.
                         if (gantry.getId() == 0) {
                             // assign input job
-                            gantry.setCurrentJob(inputQueue.poll());
+                            Job nextJob=inputQueue.poll();
+                            if(nextJob!=null){
+                                gantry.setCurrentJob(solveInputJob(nextJob));
+                            }
+
                         } else {
-                            // todo: assign output job
+                            // assign ouput job
+                            Job nextJob=outputQueue.poll();
+                            if(nextJob!=null){
+                                nextJob=solveOutputJob(nextJob);
+                            }
+                            if(nextJob==null && !precedingJobs.isEmpty()){
+                                nextJob=precedingJobs.poll();
+                                nextJob=solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
+                                gantry.setCurrentJob(nextJob);
+                            }
 
                         }
+                        gantry.checkForIdleTransition(globalTime);
                     }
                 }
+                //job is assigned, now perform action on time step.
 
-                if (globalTime == job.getStartingTimePickup()) {
-                    gantry.printStatus(globalTime);
-                } else if (globalTime == job.getStartingTimePlace()) {
-                    gantry.printStatus(globalTime);
-                } else if (globalTime == job.getStartingTimePickup() + job.getPickup().getTime()) {
-                    gantry.moveCrane(job.getPickup().getSlot().getCenterX(), job.getPickup().getSlot().getCenterY());
-                    gantry.printStatus(globalTime);
-                } else if (globalTime == job.getStartingTimePlace() + job.getPlace().getTime()) {
-                    gantry.moveCrane(job.getPlace().getSlot().getCenterX(), job.getPlace().getSlot().getCenterY());
-                    gantry.printStatus(globalTime);
-                } else if (globalTime == job.getStartingTimePickup() + job.getPickup().getTime() + problem.getPickupPlaceDuration()) {
-                    gantry.printStatus(globalTime);
-                } else if (globalTime == job.getStartingTimePlace() + job.getPlace().getTime() + problem.getPickupPlaceDuration()) {
-                    gantry.printStatus(globalTime);
-                }
+                gantry.performTimeStep(globalTime);
 
-                if (globalTime >= job.getStartingTimePlace() + job.getPlace().getTime()) {
-                    gantry.setCurrentJob(null);
-                }
             }
-
+            System.out.println(globalTime);
             continueLoop = checkLoop();
             globalTime++;
         }
 
     }
 
-    /*
-    private int setToNextSafeTime(){
-        int shortestTime=Integer.MAX_VALUE;
-        //todo: check all gantries, when one is idle, check pos, if save, move tim to that position
-        for(Gantry gantry: gantries){
-            if(gantry.getCurrentJob()!=null){
-                if (gantry.getCurrentJob().getRemainingTime() < shortestTime) {
-                    shortestTime = gantry.getCurrentJob().getRemainingTime();
-                }
-            }
-        }
-
-        int safeTime= findMaxSafeTime(shortestTime);
-
-    }
-    */
 
     private boolean checkLoop() {
-        if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty() && currentJobs.isEmpty()) {
+        if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty()
+                && gantries.get(0).getMode()== Gantry.gantryMode.IDLE
+                && gantries.get(1).getMode()== Gantry.gantryMode.IDLE) {
             return false;
         }
         return true;

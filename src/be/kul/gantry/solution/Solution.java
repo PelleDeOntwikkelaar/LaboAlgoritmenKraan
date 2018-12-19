@@ -177,9 +177,10 @@ public class Solution {
                                 gantry.setCurrentJob(solveInputJob(nextJob));
                             } else {
                                 gantry.setMoveToX(-15);
-                                gantry.setMoveToX(5);
+                                gantry.setMoveToY(5);
                                 gantry.printStatus(globalTime);
                                 gantry.setMode(Gantry.gantryMode.MOVE);
+                                gantry.setMakeMoveTransition(false);
                             }
 
                         } else {

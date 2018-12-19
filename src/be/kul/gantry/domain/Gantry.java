@@ -385,4 +385,8 @@ public class Gantry {
         MOVE,
         IDLE
     }
+
+    public void setMakeMoveTransition(Boolean makeMoveTransition) {
+        this.makeMoveTransition = makeMoveTransition;
+    }
 }

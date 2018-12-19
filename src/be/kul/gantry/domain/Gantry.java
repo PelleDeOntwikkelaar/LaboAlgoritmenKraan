@@ -186,6 +186,7 @@ public class Gantry {
             System.out.println("pickupDone: id "+id );
             moveToX=currentJob.getPlace().getSlot().getCenterX();
             moveToY=currentJob.getPlace().getSlot().getCenterY();
+            currentJob.pickedUp();
             mode=gantryMode.MOVE;
             slots.removeItemFromSlot(currentJob.getItem(),currentJob.getPickup().getSlot());
             printStatus(currentTime);
@@ -196,6 +197,7 @@ public class Gantry {
         if (pickUpPlaceCountDown==0){
             System.out.println("placeDone: id "+id );
             slots.addItemToSlot(currentJob.getItem(),currentJob.getPlace().getSlot());
+            currentJob.placed();
             printStatus(currentTime);
             currentJob=null;
             mode=gantryMode.IDLE;
@@ -216,7 +218,6 @@ public class Gantry {
         }
 
     }
-
 
     private void posUpdate(int currentIndex, int interval, int moveTo, double speed){
         ArrayList<Integer> current=new ArrayList<>();
@@ -252,7 +253,7 @@ public class Gantry {
         stb.append(currentY);
         stb.append(";");
 
-        if (currentJob.getItem() == null) stb.append("null");
+        if (!currentJob.isPickedup() ) stb.append("null");
         else stb.append(currentJob.getItem().getId());
         stb.append(";");
 
@@ -273,6 +274,7 @@ public class Gantry {
     }
 
     public void performTimeStep(double time) {
+
         if(mode==gantryMode.MOVE){
             moveCraneToNewPosition(time);
         }else if(mode==gantryMode.PICKUP){

@@ -149,7 +149,7 @@ public class Slots {
         else maxX = findMaxX(gantries.get(0));
         Slot bestSlot = tryFindBestSlotLeftRightToX(maxX + 20, gantries.get(0), forbiddenSlots, false);
         if (bestSlot == null) {
-            bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, false);
+            bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, true);
         }
         return bestSlot;
     }

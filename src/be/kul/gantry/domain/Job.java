@@ -13,6 +13,7 @@ public class Job {
 
     private final Task pickup;
     private final Task place;
+    private boolean pickedup;
 
     private final Item item;
 
@@ -26,6 +27,7 @@ public class Job {
         this.place = new Task(id * 2 + 1, TaskType.PLACE);
         this.pickup.slot = from;
         this.place.slot = to;
+        pickedup=false;
     }
 
     public int getId() {
@@ -42,6 +44,18 @@ public class Job {
 
     public Item getItem() {
         return item;
+    }
+
+    public boolean isPickedup() {
+        return pickedup;
+    }
+
+    public void pickedUp(){
+        pickedup=true;
+    }
+
+    public void placed(){
+        pickedup=false;
     }
 
 

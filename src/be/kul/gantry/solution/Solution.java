@@ -84,6 +84,10 @@ public class Solution {
     private Job solveOutputJob(Job nexOutputJobToSolve) {
         //pre solving work: finding item, computing stacked slots,..
         Slot slot = slots.findSlotByItem(nexOutputJobToSolve.getItem());
+        if(slot==null){
+            return null;
+        }
+
         if (nexOutputJobToSolve.getPickup().getSlot() == null) {
             nexOutputJobToSolve.getPickup().setSlot(slot);
         }

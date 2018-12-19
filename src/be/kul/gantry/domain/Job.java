@@ -46,7 +46,7 @@ public class Job {
         return item;
     }
 
-    public boolean isPickedup() {
+    public boolean isPickedUp() {
         return pickedup;
     }
 

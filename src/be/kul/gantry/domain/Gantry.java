@@ -32,7 +32,7 @@ public class Gantry {
 
     private CSVFileWriter csvFileWriter;
 
-    private Boolean makeTransition;
+    private Boolean makeMoveTransition;
 
 
     public Gantry(int id,
@@ -53,7 +53,12 @@ public class Gantry {
         this.currentY = startY;
         mode = gantryMode.IDLE;
 
-        makeTransition = true;
+        moveToX = currentX;
+        moveToY = currentY;
+
+
+
+        makeMoveTransition = true;
     }
 
     public void setSlots(Slots slots) {
@@ -168,18 +173,18 @@ public class Gantry {
         int xInt = moveToX - currentX;
         int yInt = moveToY - currentY;
 
-        if (id == 1 && !calculateOtherGantryBoundarie(true, otherGantry)) {
+        if (id == 1 && !calculateOtherGantryBoundary(true, otherGantry)) {
             mode = gantryMode.WAIT;
             printStatus(currentTime);
         } else {
-            if (makeTransition) {
+            if (makeMoveTransition) {
                 posUpdate(0, xInt, moveToX, xSpeed);
                 posUpdate(1, yInt, moveToY, ySpeed);
                 System.out.println("posupdate: id " + id);
 
                 checkForMoveTransition(currentTime, otherGantry);
             } else {
-                makeTransition = true;
+                makeMoveTransition = true;
             }
         }
 
@@ -206,9 +211,9 @@ public class Gantry {
             currentJob.pickedUp();
             slots.removeItemFromSlot(currentJob.getItem(), currentJob.getPickup().getSlot());
             printStatus(currentTime);
-            if ((id == 1 && !calculateOtherGantryBoundarie(true, otherGantry)) || id == 0) {
+            if ((id == 1 && !calculateOtherGantryBoundary(true, otherGantry)) || id == 0) {
                 mode = gantryMode.MOVE;
-                makeTransition = false;
+                makeMoveTransition = false;
                 printStatus(currentTime);
             } else {
                 mode = gantryMode.WAIT;
@@ -226,6 +231,12 @@ public class Gantry {
             printStatus(currentTime);
             currentJob = null;
             mode = gantryMode.IDLE;
+
+            moveToX = currentX;
+            moveToY = currentY;
+
+
+
         }
     }
 
@@ -237,9 +248,9 @@ public class Gantry {
                 mode = gantryMode.PICKUP;
                 printStatus(currentTime);
             } else {
-                if ((id == 1 && !calculateOtherGantryBoundarie(true, otherGantry)) || id == 0) {
+                if ((id == 1 && !calculateOtherGantryBoundary(true, otherGantry)) || id == 0) {
                     mode = gantryMode.MOVE;
-                    makeTransition = false;
+                    makeMoveTransition = false;
                     printStatus(currentTime);
                 }
             }
@@ -250,7 +261,12 @@ public class Gantry {
     private void checkForWaitTransition(double currentTime, Gantry otherGantry) {
         if (currentJob == null) {
             mode = gantryMode.IDLE;
-        } else if (id == 1 && !calculateOtherGantryBoundarie(true, otherGantry)) {
+
+            moveToX = currentX;
+            moveToY = currentY;
+
+
+        } else if (id == 1 && calculateOtherGantryBoundary(true, otherGantry)) {
             mode = gantryMode.MOVE;
             printStatus(currentTime);
         }
@@ -290,7 +306,7 @@ public class Gantry {
         stb.append(currentY);
         stb.append(";");
 
-        if (!currentJob.isPickedup()) stb.append("null");
+        if (!currentJob.isPickedUp()) stb.append("null");
         else stb.append(currentJob.getItem().getId());
         stb.append(";");
 
@@ -336,7 +352,7 @@ public class Gantry {
         }
     }
 
-    private boolean calculateOtherGantryBoundarie(boolean lessGreater, Gantry otherGantry) {
+    private boolean calculateOtherGantryBoundary(boolean lessGreater, Gantry otherGantry) {
         int minX = getMinimalX(otherGantry);
         int maxX = getMaximalX(otherGantry);
         if (lessGreater) {

@@ -167,6 +167,7 @@ public class Solution {
                         }
                         gantry.checkForIdleTransition(globalTime,otherGantry);
                     }
+
                     if (gantry.getMode() == Gantry.gantryMode.IDLE) {
                         //if gantry == input gantry -> assign input job, else -> output job.
                         if (gantry.getId() == 0) {
@@ -204,9 +205,6 @@ public class Solution {
             continueLoop = checkLoop();
             globalTime++;
         }
-
-        System.out.println("done");
-
     }
 
 

@@ -175,6 +175,11 @@ public class Solution {
                             Job nextJob = inputQueue.poll();
                             if (nextJob != null) {
                                 gantry.setCurrentJob(solveInputJob(nextJob));
+                            } else {
+                                gantry.setMoveToX(-15);
+                                gantry.setMoveToX(5);
+                                gantry.printStatus(globalTime);
+                                gantry.setMode(Gantry.gantryMode.MOVE);
                             }
 
                         } else {
@@ -215,6 +220,7 @@ public class Solution {
 
             return false;
         }
+        if(globalTime>300000)return false;
         return true;
     }
 

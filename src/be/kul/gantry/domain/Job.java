@@ -27,7 +27,7 @@ public class Job {
         this.place = new Task(id * 2 + 1, TaskType.PLACE);
         this.pickup.slot = from;
         this.place.slot = to;
-        pickedup=false;
+        pickedup = false;
     }
 
     public int getId() {
@@ -50,12 +50,12 @@ public class Job {
         return pickedup;
     }
 
-    public void pickedUp(){
-        pickedup=true;
+    public void pickedUp() {
+        pickedup = true;
     }
 
-    public void placed(){
-        pickedup=false;
+    public void placed() {
+        pickedup = false;
     }
 
 

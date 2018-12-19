@@ -30,6 +30,7 @@ public class Gantry {
 
     private CSVFileWriter csvFileWriter;
 
+    private Boolean makeTransition;
 
 
     public Gantry(int id,
@@ -46,7 +47,9 @@ public class Gantry {
 
         this.currentX = startX;
         this.currentY = startY;
-        mode=gantryMode.IDLE;
+        mode = gantryMode.IDLE;
+
+        makeTransition = true;
     }
 
     public void setSlots(Slots slots) {
@@ -156,85 +159,94 @@ public class Gantry {
         currentX = centerX;
         currentY = centerY;
     }
-    public void moveCraneToNewPosition(double currentTime){
-        int xInt=moveToX-currentX;
-        int yInt=moveToY-currentY;
 
-        posUpdate(0,xInt,moveToX,xSpeed);
-        posUpdate(1,yInt,moveToY,ySpeed);
-        System.out.println("posupdate: id "+id );
+    public void moveCraneToNewPosition(double currentTime) {
+        int xInt = moveToX - currentX;
+        int yInt = moveToY - currentY;
 
-        checkForMoveTransition(currentTime);
+        if (makeTransition) {
+            posUpdate(0, xInt, moveToX, xSpeed);
+            posUpdate(1, yInt, moveToY, ySpeed);
+            System.out.println("posupdate: id " + id);
+
+            checkForMoveTransition(currentTime);
+        } else {
+            makeTransition = true;
+        }
+
+
 
     }
 
     private void checkForMoveTransition(double currentTime) {
 
-        if(currentJob.getPickup().getSlot().getCenterX()==currentX&&currentJob.getPickup().getSlot().getCenterY()==currentY){
-            mode=gantryMode.PICKUP;
+        if (currentJob.getPickup().getSlot().getCenterX() == currentX && currentJob.getPickup().getSlot().getCenterY() == currentY) {
+            mode = gantryMode.PICKUP;
             printStatus(currentTime);
-            pickUpPlaceCountDown=pickUpPlaceDuration;
-        }else if(currentJob.getPlace().getSlot().getCenterX()==currentX&&currentJob.getPlace().getSlot().getCenterY()==currentY){
-            mode=gantryMode.PLACE;
+            pickUpPlaceCountDown = pickUpPlaceDuration;
+        } else if (currentJob.getPlace().getSlot().getCenterX() == currentX && currentJob.getPlace().getSlot().getCenterY() == currentY) {
+            mode = gantryMode.PLACE;
             printStatus(currentTime);
-            pickUpPlaceCountDown=pickUpPlaceDuration;
+            pickUpPlaceCountDown = pickUpPlaceDuration;
         }
     }
 
-    public void checkForPickUpTransition(double currentTime){
-        if (pickUpPlaceCountDown==0){
-            System.out.println("pickupDone: id "+id );
-            moveToX=currentJob.getPlace().getSlot().getCenterX();
-            moveToY=currentJob.getPlace().getSlot().getCenterY();
+    public void checkForPickUpTransition(double currentTime) {
+        if (pickUpPlaceCountDown == 0) {
+            System.out.println("pickupDone: id " + id);
+            moveToX = currentJob.getPlace().getSlot().getCenterX();
+            moveToY = currentJob.getPlace().getSlot().getCenterY();
             currentJob.pickedUp();
-            mode=gantryMode.MOVE;
-            slots.removeItemFromSlot(currentJob.getItem(),currentJob.getPickup().getSlot());
+            mode = gantryMode.MOVE;
+            makeTransition = false;
+            slots.removeItemFromSlot(currentJob.getItem(), currentJob.getPickup().getSlot());
             printStatus(currentTime);
         }
     }
 
-    public void checkForPlaceTransition(double currentTime){
-        if (pickUpPlaceCountDown==0){
-            System.out.println("placeDone: id "+id );
-            slots.addItemToSlot(currentJob.getItem(),currentJob.getPlace().getSlot());
+    public void checkForPlaceTransition(double currentTime) {
+        if (pickUpPlaceCountDown == 0) {
+            System.out.println("placeDone: id " + id);
+            slots.addItemToSlot(currentJob.getItem(), currentJob.getPlace().getSlot());
             currentJob.placed();
             printStatus(currentTime);
-            currentJob=null;
-            mode=gantryMode.IDLE;
+            currentJob = null;
+            mode = gantryMode.IDLE;
         }
     }
 
-    public void checkForIdleTransition(double currentTime){
-        if(mode==gantryMode.IDLE && currentJob!=null){
-            System.out.println("idle: id "+id );
-            if(currentX==moveToX &&currentY==moveToY){
-                pickUpPlaceCountDown=pickUpPlaceDuration;
-                mode=gantryMode.PICKUP;
+    public void checkForIdleTransition(double currentTime) {
+        if (mode == gantryMode.IDLE && currentJob != null) {
+            System.out.println("idle: id " + id);
+            if (currentX == moveToX && currentY == moveToY) {
+                pickUpPlaceCountDown = pickUpPlaceDuration;
+                mode = gantryMode.PICKUP;
                 printStatus(currentTime);
-            }else{
-                mode=gantryMode.MOVE;
+            } else {
+                mode = gantryMode.MOVE;
+                makeTransition = false;
                 printStatus(currentTime);
             }
         }
 
     }
 
-    private void posUpdate(int currentIndex, int interval, int moveTo, double speed){
-        ArrayList<Integer> current=new ArrayList<>();
+    private void posUpdate(int currentIndex, int interval, int moveTo, double speed) {
+        ArrayList<Integer> current = new ArrayList<>();
         current.add(currentX);
         current.add(currentY);
-        if(interval>speed){
-            if(currentIndex==0)currentX+=speed;
-            else currentY+=speed;
-        }else if(interval>0){
-            if(currentIndex==0)currentX=moveTo;
-            else currentY=moveTo;
-        }else if(interval<(-1)*speed){
-            if(currentIndex==0)currentX-=speed;
-            else currentY-=speed;
-        }else if(interval<0){
-            if(currentIndex==0)currentX=moveTo;
-            else currentY=moveTo;
+        if (interval > speed) {
+            if (currentIndex == 0) currentX += speed;
+            else currentY += speed;
+        } else if (interval > 0) {
+            if (currentIndex == 0) currentX = moveTo;
+            else currentY = moveTo;
+        } else if (interval < (-1) * speed) {
+            if (currentIndex == 0) currentX -= speed;
+            else currentY -= speed;
+        } else if (interval < 0) {
+            if (currentIndex == 0) currentX = moveTo;
+            else currentY = moveTo;
         }
     }
 
@@ -253,13 +265,13 @@ public class Gantry {
         stb.append(currentY);
         stb.append(";");
 
-        if (!currentJob.isPickedup() ) stb.append("null");
+        if (!currentJob.isPickedup()) stb.append("null");
         else stb.append(currentJob.getItem().getId());
         stb.append(";");
 
         stb.append("\n");
 
-        csvFileWriter.add( stb);
+        csvFileWriter.add(stb);
 
     }
 
@@ -269,25 +281,25 @@ public class Gantry {
 
     public void setCurrentJob(Job currentJob) {
         this.currentJob = currentJob;
-        moveToX=this.currentJob.getPickup().getSlot().getCenterX();
-        moveToY=this.currentJob.getPickup().getSlot().getCenterY();
+        moveToX = this.currentJob.getPickup().getSlot().getCenterX();
+        moveToY = this.currentJob.getPickup().getSlot().getCenterY();
     }
 
     public void performTimeStep(double time) {
 
-        if(mode==gantryMode.MOVE){
+        if (mode == gantryMode.MOVE) {
             moveCraneToNewPosition(time);
-        }else if(mode==gantryMode.PICKUP){
+        } else if (mode == gantryMode.PICKUP) {
             pickUpPlaceCountDown--;
-            if(pickUpPlaceCountDown==0){
+            if (pickUpPlaceCountDown == 0) {
                 checkForPickUpTransition(time);
             }
-        }else if(mode==gantryMode.PLACE){
+        } else if (mode == gantryMode.PLACE) {
             pickUpPlaceCountDown--;
-            if(pickUpPlaceCountDown==0){
+            if (pickUpPlaceCountDown == 0) {
                 checkForPlaceTransition(time);
             }
-        }else if(mode==gantryMode.IDLE){
+        } else if (mode == gantryMode.IDLE) {
             checkForIdleTransition(time);
         }
     }

@@ -106,6 +106,7 @@ public class Slots {
                 //when an item is moved out of relocation purposes, the slot above may never be the destination slot
                 if (slot.getItem() == null) {
                     if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
+                        slot.setReserved(true);
                         return slot;
                     }
 
@@ -132,6 +133,7 @@ public class Slots {
         if (bestSlot == null) {
             bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, true);
         }
+        bestSlot.setReserved(true);
         return bestSlot;
     }
 
@@ -151,6 +153,7 @@ public class Slots {
         if (bestSlot == null) {
             bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, true);
         }
+        bestSlot.setReserved(true);
         return bestSlot;
     }
 
@@ -164,8 +167,14 @@ public class Slots {
                     //forbidden slots== null -> never a problem
                     //forbiddenslots!=null -> check if it doesn't contain slot.
                     if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
-                        if (leftRight && slot.getCenterX() < x) return slot;
-                        else if (!leftRight && slot.getCenterX() > x) return slot;
+                        if (leftRight && slot.getCenterX() < x) {
+                            slot.setReserved(true);
+                            return slot;
+                        }
+                        else if (!leftRight && slot.getCenterX() > x) {
+                            slot.setReserved(true);
+                            return slot;
+                        }
                     }
 
                 }
@@ -234,6 +243,8 @@ public class Slots {
         item.setSlotID(slot);
         //add item to storage collection
         itemsInStorage.add(item);
+
+        slot.setReserved(false);
     }
 
 
@@ -247,7 +258,7 @@ public class Slots {
         slot.setItem(null);
         item.setSlotID(null);
         itemsInStorage.remove(item);
-
+        slot.setReserved(false);
     }
 
     public Set<Slot> findForbiddenSlots(Slot slotToSolvePickUp) {

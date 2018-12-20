@@ -199,11 +199,11 @@ public class Gantry {
             if (currentJob.getPickup().getSlot().getCenterX() == currentX && currentJob.getPickup().getSlot().getCenterY() == currentY) {
                 mode = gantryMode.PICKUP;
                 printStatus(currentTime);
-                pickUpPlaceCountDown = pickUpPlaceDuration;
+                pickUpPlaceCountDown = pickUpPlaceDuration + 1;
             } else if (currentJob.getPlace().getSlot().getCenterX() == currentX && currentJob.getPlace().getSlot().getCenterY() == currentY) {
                 mode = gantryMode.PLACE;
                 printStatus(currentTime);
-                pickUpPlaceCountDown = pickUpPlaceDuration;
+                pickUpPlaceCountDown = pickUpPlaceDuration + 1;
             } else {
                 if(moveToX==currentX && moveToY==currentY){
                     if (!currentJob.isPickedUp()) {
@@ -241,7 +241,7 @@ public class Gantry {
 
     public void checkForPickUpTransition(double currentTime, Gantry otherGantry) {
         if (pickUpPlaceCountDown == 0) {
-            System.out.println("pickupDone: id " + id);
+            System.out.println("pickupDone: id " + id + "   item: " + currentJob.getItem().getId());
             moveToX = currentJob.getPlace().getSlot().getCenterX();
             moveToY = currentJob.getPlace().getSlot().getCenterY();
             currentJob.pickedUp();
@@ -262,7 +262,7 @@ public class Gantry {
 
     public void checkForPlaceTransition(double currentTime, Gantry otherGantry) {
         if (pickUpPlaceCountDown == 0) {
-            System.out.println("placeDone: id " + id);
+            System.out.println("placeDone: id " + id + "   item: " + currentJob.getItem().getId());
             slots.addItemToSlot(currentJob.getItem(), currentJob.getPlace().getSlot());
             currentJob.placed();
             printStatus(currentTime);
@@ -279,7 +279,7 @@ public class Gantry {
         if (mode == gantryMode.IDLE && currentJob != null) {
             System.out.println("idle: id " + id);
             if (currentX == moveToX && currentY == moveToY) {
-                pickUpPlaceCountDown = pickUpPlaceDuration;
+                pickUpPlaceCountDown = pickUpPlaceDuration + 1;
                 mode = gantryMode.PICKUP;
                 printStatus(currentTime);
             } else {

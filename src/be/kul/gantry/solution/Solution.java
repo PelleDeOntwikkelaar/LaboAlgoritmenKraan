@@ -144,28 +144,31 @@ public class Solution {
         Boolean continueLoop = true;
         while (continueLoop) {
 
-            //todo: wait times & safetygap.
-
             for (Gantry gantry: gantries) {
                 Gantry otherGantry = null;
                 for (Gantry gantry1 : gantries) {
                     if (gantry1 != gantry) {
-                        otherGantry = gantry;
+                        otherGantry = gantry1;
                     }
                 }
                 //if gantry is idle -> assign next job
                 if (gantry.getMode() == Gantry.gantryMode.IDLE) {
                     if (!precedingJobs.isEmpty()) {
                         // assign preceding job
-                        Job nextJob = precedingJobs.poll();
+                        Job nextJob = precedingJobs.peek();
 
-                        if (nextJob.getPlace().getSlot() != null && gantry.getId() == 1) {
-                            gantry.setCurrentJob(nextJob);
-                        } else if (nextJob.getPlace().getSlot() == null) {
-                            nextJob = solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
-                            gantry.setCurrentJob(nextJob);
+                        if (nextJob.getPickup().getSlot().getCenterX() < (otherGantry.getCurrentX() + problem.getSafetyDistance())) {
+                            nextJob = precedingJobs.poll();
+
+
+                            if (nextJob.getPlace().getSlot() != null && gantry.getId() == 1) {
+                                gantry.setCurrentJob(nextJob);
+                            } else if (nextJob.getPlace().getSlot() == null) {
+                                nextJob = solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
+                                gantry.setCurrentJob(nextJob);
+                            }
+                            gantry.checkForIdleTransition(globalTime,otherGantry);
                         }
-                        gantry.checkForIdleTransition(globalTime,otherGantry);
                     }
 
                     if (gantry.getMode() == Gantry.gantryMode.IDLE) {
@@ -185,7 +188,7 @@ public class Solution {
 
                         } else {
                             // assign ouput job
-                            Job nextJob = outputQueue.poll();
+                            Job nextJob = outputQueue.peek();
                             if (nextJob != null) {
                                 nextJob = solveOutputJob(nextJob);
                             }
@@ -193,6 +196,8 @@ public class Solution {
                                 nextJob = precedingJobs.poll();
                                 nextJob = solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
                                 gantry.setCurrentJob(nextJob);
+                            } else if (nextJob != null) {
+                                nextJob = outputQueue.poll();
                             }
 
                         }

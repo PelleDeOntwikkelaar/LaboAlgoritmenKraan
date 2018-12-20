@@ -10,6 +10,8 @@ public class Slot {
     private Item item;
     private final SlotType type;
 
+    private Boolean reserved;
+
     public Slot(int id, int centerX, int centerY, int xMin, int xMax, int yMin, int yMax, int z, SlotType type, Item item) {
         this.id = id;
         this.centerX = centerX;
@@ -21,6 +23,8 @@ public class Slot {
         this.z = z;
         this.item = item;
         this.type = type;
+
+        reserved = false;
     }
 
     public int getId() {
@@ -88,5 +92,13 @@ public class Slot {
         INPUT,
         OUTPUT,
         STORAGE
+    }
+
+    public Boolean getReserved() {
+        return reserved;
+    }
+
+    public void setReserved(Boolean reserved) {
+        this.reserved = reserved;
     }
 }

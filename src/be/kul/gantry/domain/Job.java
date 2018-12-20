@@ -1,7 +1,5 @@
 package be.kul.gantry.domain;
 
-import be.kul.gantry.Extra.CSVFileWriter;
-
 import java.util.Set;
 
 /**
@@ -13,7 +11,7 @@ public class Job {
 
     private final Task pickup;
     private final Task place;
-    private boolean pickedup;
+    private boolean pickedUp;
 
     private final Item item;
 
@@ -27,7 +25,7 @@ public class Job {
         this.place = new Task(id * 2 + 1, TaskType.PLACE);
         this.pickup.slot = from;
         this.place.slot = to;
-        pickedup = false;
+        pickedUp = false;
     }
 
     public int getId() {
@@ -47,15 +45,15 @@ public class Job {
     }
 
     public boolean isPickedUp() {
-        return pickedup;
+        return pickedUp;
     }
 
     public void pickedUp() {
-        pickedup = true;
+        pickedUp = true;
     }
 
     public void placed() {
-        pickedup = false;
+        pickedUp = false;
     }
 
     public Set<Slot> getForbiddenSlots() {

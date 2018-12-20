@@ -172,7 +172,7 @@ public class Gantry {
         int xInt = moveToX - currentX;
         int yInt = moveToY - currentY;
 
-        if (id == 1 && calculateOtherGantryBoundary(true, otherGantry)) {
+        if (id == 1 && !calculateOtherGantryBoundary(true, otherGantry)) {
             mode = gantryMode.WAIT;
             printStatus(currentTime);
         } else {
@@ -221,7 +221,6 @@ public class Gantry {
                     checkForWaitOrMove(currentTime, otherGantry);
                 }
 
-
             }
         }
 
@@ -269,7 +268,6 @@ public class Gantry {
 
             moveToX = currentX;
             moveToY = currentY;
-
 
         }
     }

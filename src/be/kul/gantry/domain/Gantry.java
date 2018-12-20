@@ -205,21 +205,24 @@ public class Gantry {
                 printStatus(currentTime);
                 pickUpPlaceCountDown = pickUpPlaceDuration;
             } else {
-                if (!currentJob.isPickedUp()) {
-                    moveToX = currentJob.getPickup().getSlot().getCenterX();
-                    moveToY = currentJob.getPickup().getSlot().getCenterY();
-                } else {
-                    moveToX = currentJob.getPlace().getSlot().getCenterX();
-                    moveToY = currentJob.getPlace().getSlot().getCenterY();
-                }
-                printStatus(currentTime);
-                if ((id == 1 && calculateOtherGantryBoundary(true, otherGantry)) || id == 0) {
-                    mode = gantryMode.MOVE;
-                    makeMoveTransition = false;
+                if(moveToX==currentX && moveToY==currentY){
+                    if (!currentJob.isPickedUp()) {
+                        moveToX = currentJob.getPickup().getSlot().getCenterX();
+                        moveToY = currentJob.getPickup().getSlot().getCenterY();
+                    } else {
+                        moveToX = currentJob.getPlace().getSlot().getCenterX();
+                        moveToY = currentJob.getPlace().getSlot().getCenterY();
+                    }
                     printStatus(currentTime);
-                } else {
-                    checkForWaitOrMove(currentTime, otherGantry);
+                    if ((id == 1 && calculateOtherGantryBoundary(true, otherGantry)) || id == 0) {
+                        mode = gantryMode.MOVE;
+                        makeMoveTransition = false;
+                        printStatus(currentTime);
+                    } else {
+                        checkForWaitOrMove(currentTime, otherGantry);
+                    }
                 }
+
 
             }
         }

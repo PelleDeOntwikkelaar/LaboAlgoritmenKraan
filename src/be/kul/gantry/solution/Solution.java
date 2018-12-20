@@ -141,6 +141,15 @@ public class Solution {
      */
     public void solve() {
 
+        if (problem.getGantries().size() == 1) {
+
+            while (!(inputQueue.isEmpty() && outputQueue.isEmpty() && jobToSolve == null && precedingJobs.isEmpty())) {
+                solveNextJobOne();
+            }
+            return;
+        }
+
+
         Boolean continueLoop = true;
         while (continueLoop) {
 
@@ -242,6 +251,120 @@ public class Solution {
         }
         if (globalTime > 300000) return false;
         return true;
+    }
+
+
+    private void solveNextJobOne() {
+
+        if ((!outputQueue.isEmpty() && !slots.containsItem(outputQueue.peek().getItem())) || outputQueue.isEmpty()) {
+            // if the item we want to extract isn't in storage we'll do an input job
+            if (!inputQueue.isEmpty()) {
+                jobToSolve = inputQueue.poll();
+                solveInputJobOne();
+            }
+        } else if (!outputQueue.isEmpty()) {
+            // solve an output job
+            jobToSolve = outputQueue.poll();
+            solveOutputJobOne();
+        }
+    }
+
+    private void solveInputJobOne() {
+
+        // If there's only one gantry
+        Gantry gantry = gantries.get(0);
+
+        if (jobToSolve.getPlace().getSlot() == null) {
+
+            //calculate drop off slot
+            Slot bestFit = slots.findBestSlot(gantry.getCurrentX(), gantry.getCurrentY(), gantry.getXSpeed(), gantry.getYSpeed(), null);
+
+            //update Job parameters
+            jobToSolve.getPlace().setSlot(bestFit);
+            slots.addItemToSlot(jobToSolve.getItem(), bestFit);
+        }
+
+        executeJobOne(jobToSolve, gantry);
+        System.out.println(jobToSolve + "time: " + time);
+
+        jobToSolve = null;
+    }
+
+    private void solveOutputJobOne() {
+
+        // If there's only one gantry
+        Gantry gantry = gantries.get(0);
+
+        if (jobToSolve.getPickup().getSlot() == null) {
+            Slot slot = slots.findSlotByItem(jobToSolve.getItem());
+            jobToSolve.getPickup().setSlot(slot);
+            List<Slot> stackedItems = slots.getStackedItemSlots(slot);
+            if (!stackedItems.isEmpty()) {
+                for (Slot slt : stackedItems) {
+                    Job job = new Job(jobNumber++, slt.getItem(), slt, null);
+                    job.getPickup().setSlot(slt);
+                    precedingJobs.addFirst(job);
+                }
+                // execute all preceding jobs
+                for (Job job : precedingJobs) {
+                    solvePrecedingJobOne(job, gantry);
+                }
+                precedingJobs.clear();
+            }
+
+            slots.removeItemFromSlot(jobToSolve.getItem(), jobToSolve.getPickup().getSlot());
+        }
+
+        executeJobOne(jobToSolve, gantry);
+        System.out.println(jobToSolve + "time: " + time);
+
+        jobToSolve = null;
+    }
+
+    /**
+     * Method that performs a preceding job.
+     *
+     * @param job    Type Job: Job to complete in this method.
+     * @param gantry Type Gantry: Crane that will perform the given job.
+     */
+    private void solvePrecedingJobOne(Job job, Gantry gantry) {
+
+        Slot pickupSlot = job.getPickup().getSlot();
+
+        Set<Slot> forbiddenSlots = slots.findForbiddenSlots(jobToSolve.getPickup().getSlot());
+        Slot bestFit = slots.findBestSlot(pickupSlot.getCenterX(), pickupSlot.getCenterY(), gantry.getXSpeed(), gantry.getYSpeed(), forbiddenSlots);
+        job.getPlace().setSlot(bestFit);
+
+        slots.removeItemFromSlot(job.getItem(), pickupSlot);
+        slots.addItemToSlot(job.getItem(), bestFit);
+
+        executeJobOne(job, gantry);
+        System.out.println(job.toString() + "time: " + time);
+    }
+
+    /**
+     * Method that performs a job excecution in two different steps.
+     * 1) Time calculation for crane movement and print crane movement.
+     * 2) Time calculation of pickup/delivery and dor it and print specifics
+     *
+     * @param job    Type Job: Job to complete in this method.
+     * @param gantry Type Gantry: Crane that will perform the given job.
+     */
+    public void executeJobOne(Job job, Gantry gantry) {
+
+        //move gantry to pickup slot and perform time analysis
+        job.performTaskOne(gantry, job.getPickup());
+        time += job.getPickup().getTime();
+        //print status after pickup task
+        job.printStatusOne(gantry, csvFileWriter, time, Job.TaskType.PICKUP);
+        time += 10;
+
+        //move gantry to place slot and perform time analysis
+        job.performTaskOne(gantry, job.getPlace());
+        time += job.getPlace().getTime();
+        //print status after place task
+        job.printStatusOne(gantry, csvFileWriter, time, Job.TaskType.PLACE);
+        time += 10;
     }
 
 

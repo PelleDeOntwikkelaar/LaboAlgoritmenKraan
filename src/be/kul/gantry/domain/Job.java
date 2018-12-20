@@ -1,5 +1,7 @@
 package be.kul.gantry.domain;
 
+import be.kul.gantry.Extra.CSVFileWriter;
+
 import java.util.Set;
 
 /**
@@ -66,7 +68,37 @@ public class Job {
 
     @Override
     public String toString() {
-        return String.format("J%d move %d from %s to %s in %f", id, item.getId(), pickup.slot, place.slot);
+        return String.format("J%d move %d from %s to %s", id, item.getId(), pickup.slot, place.slot);
+    }
+
+    public void performTaskOne(Gantry gantry, Task task) {
+        task.calculateTime(gantry);
+        gantry.moveCrane(task.slot.getCenterX(), task.slot.getCenterY());
+    }
+
+
+    public void printStatusOne(Gantry gantry, CSVFileWriter csvFileWriter, double totalTime, TaskType type) {
+        StringBuilder stb1 = new StringBuilder();
+        StringBuilder stb2 = new StringBuilder();
+        stb1.append(gantry.printStatusOne(totalTime));
+        stb2.append(gantry.printStatusOne(totalTime+10));
+
+        if (type == TaskType.PICKUP) {
+            stb1.append("null");
+            stb2.append(item.getId());
+
+        }
+        else {
+            stb1.append(item.getId());
+            stb2.append("null");
+        }
+        stb1.append(";");
+        stb2.append(";");
+        stb1.append("\n");
+        stb2.append("\n");
+        csvFileWriter.add(stb1);
+        csvFileWriter.add(stb2);
+
     }
 
 

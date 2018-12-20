@@ -432,4 +432,23 @@ public class Gantry {
     public void setMakeMoveTransition(Boolean makeMoveTransition) {
         this.makeMoveTransition = makeMoveTransition;
     }
+
+    public String printStatusOne(double totalTime){
+        StringBuilder stb = new StringBuilder();
+
+        stb.append(id);
+        stb.append(";");
+
+        stb.append(totalTime);
+        stb.append(";");
+
+        stb.append(currentX);
+        stb.append(";");
+
+        stb.append(currentY);
+        stb.append(";");
+
+        return stb.toString();
+
+    }
 }

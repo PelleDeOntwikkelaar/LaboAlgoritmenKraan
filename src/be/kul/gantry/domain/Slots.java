@@ -104,7 +104,7 @@ public class Slots {
         while (true) {
             for (Slot slot : slotArrayYDimension.get(yArray)) {
                 //when an item is moved out of relocation purposes, the slot above may never be the destination slot
-                if (slot.getItem() == null) {
+                if (slot.getItem() == null && !slot.getReserved()) {
                     if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
                         slot.setReserved(true);
                         return slot;
@@ -131,7 +131,7 @@ public class Slots {
         else minX = findMinX(gantries.get(1));
         Slot bestSlot = tryFindBestSlotLeftRightToX(minX - 20, gantries.get(0), forbiddenSlots, true);
         if (bestSlot == null) {
-            bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, true);
+            bestSlot = tryFindBestSlotLeftRightToX(inputSlot.getCenterX(), gantries.get(0), forbiddenSlots, false);
         }
         bestSlot.setReserved(true);
         return bestSlot;
@@ -149,9 +149,9 @@ public class Slots {
         int maxX;
         if (precedingJob) maxX = refX;
         else maxX = findMaxX(gantries.get(0));
-        Slot bestSlot = tryFindBestSlotLeftRightToX(maxX + 20, gantries.get(0), forbiddenSlots, false);
+        Slot bestSlot = tryFindBestSlotLeftRightToX(maxX + 20, gantries.get(1), forbiddenSlots, false);
         if (bestSlot == null) {
-            bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(0), forbiddenSlots, true);
+            bestSlot = tryFindBestSlotLeftRightToX(outputSlot.getCenterX(), gantries.get(1), forbiddenSlots, true);
         }
         bestSlot.setReserved(true);
         return bestSlot;
@@ -163,16 +163,16 @@ public class Slots {
         while (arrayCounter != yDimension) {
             for (Slot slot : slotArrayYDimension.get(yArray)) {
                 //when an item is moved out of relocation purposes, the slot above may never be the destination slot
-                if (slot.getItem() == null) {
+                if (slot.getItem() == null && !slot.getReserved()) {
                     //forbidden slots== null -> never a problem
                     //forbiddenslots!=null -> check if it doesn't contain slot.
                     if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
                         if (leftRight && slot.getCenterX() < x) {
-                            slot.setReserved(true);
+                            //slot.setReserved(true);
                             return slot;
                         }
                         else if (!leftRight && slot.getCenterX() > x) {
-                            slot.setReserved(true);
+                            //slot.setReserved(true);
                             return slot;
                         }
                     }
@@ -258,6 +258,7 @@ public class Slots {
         slot.setItem(null);
         item.setSlotID(null);
         itemsInStorage.remove(item);
+
         slot.setReserved(false);
     }
 

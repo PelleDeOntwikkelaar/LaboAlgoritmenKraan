@@ -144,7 +144,7 @@ public class Solution {
         Boolean continueLoop = true;
         while (continueLoop) {
 
-            for (Gantry gantry: gantries) {
+            for (Gantry gantry : gantries) {
                 Gantry otherGantry = null;
                 for (Gantry gantry1 : gantries) {
                     if (gantry1 != gantry) {
@@ -167,7 +167,7 @@ public class Solution {
                                 nextJob = solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
                                 gantry.setCurrentJob(nextJob);
                             }
-                            gantry.checkForIdleTransition(globalTime,otherGantry);
+                            gantry.checkForIdleTransition(globalTime, otherGantry);
                         }
                     }
 
@@ -187,7 +187,7 @@ public class Solution {
                             }
 
                         } else {
-                            // assign ouput job
+                            // assign output job
                             Job nextJob = outputQueue.peek();
                             if (nextJob != null) {
                                 nextJob = solveOutputJob(nextJob);
@@ -215,18 +215,32 @@ public class Solution {
             System.out.println(globalTime);
             continueLoop = checkLoop();
             globalTime++;
+
+            HashSet<Slot> slotHashSet = new HashSet<>();
+
+            for (Gantry gantry : gantries) {
+                if (gantry.getCurrentJob() == null) continue;
+                if (gantry.getCurrentJob().getPlace().getSlot().isOutputSlot()) continue;
+
+                slotHashSet.add(gantry.getCurrentJob().getPlace().getSlot());
+            }
+            for (Slot slot : problem.getSlots()) {
+                if (!slotHashSet.contains(slot)) {
+                    slot.setReserved(false);
+                }
+            }
         }
     }
 
 
     private boolean checkLoop() {
         if (inputQueue.isEmpty() && outputQueue.isEmpty() && precedingJobs.isEmpty()
-                && gantries.get(0).getMode()== Gantry.gantryMode.IDLE
-                && gantries.get(1).getMode()== Gantry.gantryMode.IDLE) {
+                && gantries.get(0).getMode() == Gantry.gantryMode.IDLE
+                && gantries.get(1).getMode() == Gantry.gantryMode.IDLE) {
 
             return false;
         }
-        if(globalTime>300000)return false;
+        if (globalTime > 300000) return false;
         return true;
     }
 

@@ -11,6 +11,8 @@ public class Slot {
     private final SlotType type;
 
     private Boolean reserved;
+    private int count;
+
 
     public Slot(int id, int centerX, int centerY, int xMin, int xMax, int yMin, int yMax, int z, SlotType type, Item item) {
         this.id = id;
@@ -25,6 +27,7 @@ public class Slot {
         this.type = type;
 
         reserved = false;
+        count = 0;
     }
 
     public int getId() {

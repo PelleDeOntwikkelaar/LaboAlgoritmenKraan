@@ -173,8 +173,22 @@ public class Gantry {
         int yInt = moveToY - currentY;
 
         if (id == 1 && !calculateOtherGantryBoundary(true, otherGantry)) {
-            mode = gantryMode.WAIT;
-            printStatus(currentTime);
+
+            if (!otherGantry.calculateOtherGantryBoundary(false, this)){
+
+                moveToX = otherGantry.moveToX + safetyGap;
+
+                mode = gantryMode.MOVE;
+                makeMoveTransition = false;
+                printStatus(currentTime);
+
+            } else {
+                mode = gantryMode.WAIT;
+                printStatus(currentTime);
+            }
+
+
+
         } else {
             if (makeMoveTransition) {
                 posUpdate(0, xInt, moveToX, xSpeed);

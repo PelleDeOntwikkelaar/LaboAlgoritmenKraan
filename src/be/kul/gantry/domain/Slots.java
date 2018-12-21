@@ -11,6 +11,8 @@ public class Slots {
     //List of items currently in storage
     private ArrayList<Item> itemsInStorage;
 
+    private Set<Slot> globalForbiddenSlots;
+
     //properties of the problem
     private int yDimension;
     private int xDimension;
@@ -36,6 +38,7 @@ public class Slots {
         this.slotArrayYDimension = new ArrayList<>();
         this.itemsInStorage = new ArrayList<>();
         generateYList();
+        this.globalForbiddenSlots=new HashSet<>();
     }
 
     /**
@@ -78,6 +81,14 @@ public class Slots {
         }
     }
 
+    public void addToGlobalForbiddenSlots(Set<Slot>slots){
+        globalForbiddenSlots.addAll(slots);
+    }
+
+    public void removeFromGlobalForbiddenSlots(Set<Slot>slots){
+        globalForbiddenSlots.removeAll(slots);
+    }
+
     private int findShiftedX(Slot slot) {
         int z = slot.getZ();
         int offset = 0;
@@ -105,7 +116,7 @@ public class Slots {
             for (Slot slot : slotArrayYDimension.get(yArray)) {
                 //when an item is moved out of relocation purposes, the slot above may never be the destination slot
                 if (slot.getItem() == null && !slot.getReserved()) {
-                    if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
+                    if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot) && !globalForbiddenSlots.contains(slot))) {
                         slot.setReserved(true);
                         return slot;
                     }
@@ -166,7 +177,7 @@ public class Slots {
                 if (slot.getItem() == null && !slot.getReserved()) {
                     //forbidden slots== null -> never a problem
                     //forbiddenslots!=null -> check if it doesn't contain slot.
-                    if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot))) {
+                    if ((forbiddenSlots == null) || (forbiddenSlots != null && !forbiddenSlots.contains(slot) && !globalForbiddenSlots.contains(slot))) {
                         if (leftRight && slot.getCenterX() < x) {
                             //slot.setReserved(true);
                             return slot;
@@ -377,4 +388,11 @@ public class Slots {
         return level;
     }
 
+    public Slot getInputSlot() {
+        return inputSlot;
+    }
+
+    public Slot getOutputSlot() {
+        return outputSlot;
+    }
 }

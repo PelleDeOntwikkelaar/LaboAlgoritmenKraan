@@ -171,7 +171,10 @@ public class Gantry {
     public void moveCraneToNewPosition(double currentTime, Gantry otherGantry) {
         int xInt = moveToX - currentX;
         int yInt = moveToY - currentY;
+        posUpdate(0, xInt, moveToX, xSpeed);
+        posUpdate(1, yInt, moveToY, ySpeed);
 
+        /*
         if (id == 1 && !calculateOtherGantryBoundary(true, otherGantry)) {
 
             if (!otherGantry.calculateOtherGantryBoundary(false, this)){
@@ -200,45 +203,58 @@ public class Gantry {
                 makeMoveTransition = true;
             }
         }
+        */
 
     }
 
-    private void checkForMoveTransition(double currentTime, Gantry otherGantry) {
+    public void checkForMoveTransition(double currentTime, Gantry otherGantry) {
         if (currentJob == null) {
             if (currentX == moveToX && currentY == moveToY) {
                 mode = gantryMode.IDLE;
                 printStatus(currentTime);
             }
         } else {
-            if (currentJob.getPickup().getSlot().getCenterX() == currentX && currentJob.getPickup().getSlot().getCenterY() == currentY) {
+            if (currentX == currentJob.getPickup().getSlot().getCenterX() && currentY == currentJob.getPickup().getSlot().getCenterY() && !currentJob.isPickedUp()) {
+                pickUpPlaceCountDown = pickUpPlaceDuration + 1;
                 mode = gantryMode.PICKUP;
                 printStatus(currentTime);
+            } else if(currentX == currentJob.getPlace().getSlot().getCenterX() && currentY == currentJob.getPlace().getSlot().getCenterY() && currentJob.isPickedUp()){
                 pickUpPlaceCountDown = pickUpPlaceDuration + 1;
-            } else if (currentJob.getPlace().getSlot().getCenterX() == currentX && currentJob.getPlace().getSlot().getCenterY() == currentY) {
                 mode = gantryMode.PLACE;
                 printStatus(currentTime);
-                pickUpPlaceCountDown = pickUpPlaceDuration + 1;
-            } else {
-                if(moveToX==currentX && moveToY==currentY){
-                    if (!currentJob.isPickedUp()) {
-                        moveToX = currentJob.getPickup().getSlot().getCenterX();
-                        moveToY = currentJob.getPickup().getSlot().getCenterY();
-                    } else {
-                        moveToX = currentJob.getPlace().getSlot().getCenterX();
-                        moveToY = currentJob.getPlace().getSlot().getCenterY();
-                    }
+            }else{
+                if (currentX == moveToX && currentY == moveToY) {
+                    mode = gantryMode.WAIT;
                     printStatus(currentTime);
-                    if ((id == 1 && calculateOtherGantryBoundary(true, otherGantry)) || id == 0) {
+                }else{
+                    boolean noProblem=isChangeOfStatusNotAProblem(currentTime,otherGantry);
+                    if(!noProblem){
+                        //probleem!!!
+                        boolean noProblemCurPos=isCurrentPositionAProblem(currentTime,otherGantry);
+                        if(!noProblemCurPos){
+                            if(id==0){
+                                moveToX=getMinimalX(otherGantry)-safetyGap;
+                            }else {
+                                moveToX=getMaximalX(otherGantry)+safetyGap;
+                            }
+                            mode = gantryMode.MOVE;
+                            printStatus(currentTime);
+                        }else{
+                            printStatus(currentTime);
+                            moveToX=currentX;
+                            moveToY=currentY;
+                            mode=gantryMode.WAIT;
+                        }
+                    }else{
+
                         mode = gantryMode.MOVE;
                         makeMoveTransition = false;
-                        printStatus(currentTime);
-                    } else {
-                        checkForWaitOrMove(currentTime, otherGantry);
+
                     }
                 }
 
-
             }
+
         }
 
     }
@@ -261,13 +277,28 @@ public class Gantry {
             currentJob.pickedUp();
             slots.removeItemFromSlot(currentJob.getItem(), currentJob.getPickup().getSlot());
             printStatus(currentTime);
-            if ((id == 1 && calculateOtherGantryBoundary(true, otherGantry)) || id == 0) {
+            boolean noProblem=isChangeOfStatusNotAProblem(currentTime,otherGantry);
+            if(!noProblem){
+                //probleem!!!
+                boolean noProblemCurPos=isCurrentPositionAProblem(currentTime,otherGantry);
+                if(!noProblemCurPos){
+                    if(id==0){
+                        moveToX=getMinimalX(otherGantry)-safetyGap;
+                    }else {
+                        moveToX=getMaximalX(otherGantry)+safetyGap;
+                    }
+                    mode = gantryMode.MOVE;
+                    makeMoveTransition = false;
+                    printStatus(currentTime);
+                }else{
+                    moveToX=currentX;
+                    moveToY=currentY;
+                    mode=gantryMode.WAIT;
+                }
+            }else{
                 mode = gantryMode.MOVE;
                 makeMoveTransition = false;
                 printStatus(currentTime);
-            } else {
-                checkForWaitOrMove(currentTime,otherGantry);
-                //mode = gantryMode.WAIT;
             }
 
 
@@ -290,35 +321,105 @@ public class Gantry {
     }
 
     public void checkForIdleTransition(double currentTime, Gantry otherGantry) {
+        //check eerste voorwaarde: geen job=Idle blijven
         if (mode == gantryMode.IDLE && currentJob != null) {
+
             System.out.println("idle: id " + id);
-            if (currentX == moveToX && currentY == moveToY) {
-                pickUpPlaceCountDown = pickUpPlaceDuration + 1;
-                mode = gantryMode.PICKUP;
-                printStatus(currentTime);
-            } else {
-                if ((id == 1 && calculateOtherGantryBoundary(true, otherGantry)) || id == 0) {
+            boolean noProblem=isChangeOfStatusNotAProblem(currentTime,otherGantry);
+            if(!noProblem){
+                //probleem!!!
+                boolean noProblemCurPos=isCurrentPositionAProblem(currentTime,otherGantry);
+                if(!noProblemCurPos){
+                    if(id==0){
+                        moveToX=getMinimalX(otherGantry)-safetyGap;
+                    }else {
+                        moveToX=getMaximalX(otherGantry)+safetyGap;
+                    }
+                    mode = gantryMode.MOVE;
+                    printStatus(currentTime);
+                }else{
+                    printStatus(currentTime);
+                    moveToX=currentX;
+                    moveToY=currentY;
+                    mode=gantryMode.WAIT;
+
+                }
+            }else{
+                if (currentX == currentJob.getPickup().getSlot().getCenterX() && currentY == currentJob.getPickup().getSlot().getCenterY()) {
+                    pickUpPlaceCountDown = pickUpPlaceDuration + 1;
+                    mode = gantryMode.PICKUP;
+                    printStatus(currentTime);
+                } else {
                     mode = gantryMode.MOVE;
                     makeMoveTransition = false;
                     printStatus(currentTime);
                 }
             }
+
         }
 
     }
 
-    private void checkForWaitTransition(double currentTime, Gantry otherGantry) {
+    private boolean isCurrentPositionAProblem(double currentTime, Gantry otherGantry) {
+        if(id==0){
+            return calculateOtherGantryBoundaryOnCurrentPosition(false,otherGantry);
+        } else if(id==1){
+            return calculateOtherGantryBoundaryOnCurrentPosition(true,otherGantry);
+        }
+        return false;
+    }
+
+    private boolean isChangeOfStatusNotAProblem(double currentTime, Gantry otherGantry) {
+        if(id==0){
+            return calculateOtherGantryBoundary(false,otherGantry);
+        } else if(id==1){
+            return calculateOtherGantryBoundary(true,otherGantry);
+        }
+        return false;
+    }
+
+    public void checkForWaitTransition(double currentTime, Gantry otherGantry) {
+
         if (currentJob == null) {
             mode = gantryMode.IDLE;
-
             moveToX = currentX;
             moveToY = currentY;
 
 
-        } else if (id == 1 && calculateOtherGantryBoundary(true, otherGantry)) {
-            mode = gantryMode.MOVE;
-            makeMoveTransition = false;
-            printStatus(currentTime);
+        }else {
+            if(!currentJob.isPickedUp()){
+                moveToX=currentJob.getPickup().getSlot().getCenterX();
+                moveToY=currentJob.getPickup().getSlot().getCenterY();
+            }else{
+                moveToX=currentJob.getPlace().getSlot().getCenterX();
+                moveToY=currentJob.getPlace().getSlot().getCenterY();
+            }
+
+
+            boolean noProblem=isChangeOfStatusNotAProblem(currentTime,otherGantry);
+            if(!noProblem){
+                //probleem!!!
+                boolean noProblemCurPos=isCurrentPositionAProblem(currentTime,otherGantry);
+                if(!noProblemCurPos){
+                    if(id==0){
+                        moveToX=getMinimalX(otherGantry)-safetyGap;
+                    }else {
+                        moveToX=getMaximalX(otherGantry)+safetyGap;
+                    }
+                    mode = gantryMode.MOVE;
+                    makeMoveTransition = false;
+                    printStatus(currentTime);
+                }else{
+                    moveToX=currentX;
+                    moveToY=currentY;
+                    mode=gantryMode.WAIT;
+                }
+            }else{
+                mode = gantryMode.MOVE;
+                makeMoveTransition = false;
+                printStatus(currentTime);
+            }
+
         }
     }
 
@@ -376,18 +477,10 @@ public class Gantry {
         moveToY = this.currentJob.getPickup().getSlot().getCenterY();
     }
 
-    public void performTimeStep(double time, List<Gantry> gantries) {
-        Gantry otherGantry = null;
-        for (Gantry gantry : gantries) {
-            if (gantry != this) {
-                otherGantry = gantry;
-            }
-        }
-        if (mode == gantryMode.WAIT) {
-            checkForWaitTransition(time, otherGantry);
-        } else if (mode == gantryMode.MOVE) {
-            moveCraneToNewPosition(time, otherGantry);
-        } else if (mode == gantryMode.PICKUP) {
+    public void performTimeStep(double time, Gantry otherGantry) {
+        if(mode == gantryMode.MOVE){
+            moveCraneToNewPosition(time,otherGantry);
+        }else if (mode == gantryMode.PICKUP) {
             pickUpPlaceCountDown--;
             if (pickUpPlaceCountDown == 0) {
                 checkForPickUpTransition(time, otherGantry);
@@ -413,12 +506,46 @@ public class Gantry {
         return false;
     }
 
+    private boolean calculateOtherGantryBoundaryOnCurrentPosition(boolean lessGreater, Gantry otherGantry) {
+        int minX = getMinimalX(otherGantry);
+        int maxX = getMaximalX(otherGantry);
+        if (lessGreater) {
+            if (currentX >= maxX + safetyGap) return true;
+        } else {
+            if (currentX <= minX - safetyGap) return true;
+        }
+        return false;
+    }
+
+
+
     private int getMinimalX(Gantry otherGantry) {
         return Math.min(otherGantry.currentX, otherGantry.moveToX);
     }
 
     private int getMaximalX(Gantry otherGantry) {
         return Math.max(otherGantry.currentX, otherGantry.moveToX);
+    }
+
+    public void forceUnlock( int globalTime, Gantry otherGantry) {
+        if(id==0 && currentJob==null){
+            moveToX=-15;
+            moveToY=5;
+            printStatus(globalTime);
+        }else if(id==0){
+            if(!currentJob.isPickedUp()){
+                moveToX=currentJob.getPickup().getSlot().getCenterX();
+                moveToY=currentJob.getPickup().getSlot().getCenterY();
+            }else{
+                moveToX=currentJob.getPlace().getSlot().getCenterX();
+                moveToY=currentJob.getPlace().getSlot().getCenterY();
+            }
+            printStatus(globalTime);
+            mode=gantryMode.MOVE;
+            otherGantry.moveToX=moveToX+safetyGap;
+            otherGantry.printStatus(globalTime);
+            otherGantry.mode=gantryMode.MOVE;
+        }
     }
 
     public enum gantryMode {

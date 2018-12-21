@@ -85,11 +85,20 @@ public class Solution {
         if (slot == null) {
             return null;
         }
+        nexOutputJobToSolve=outputQueue.poll();
 
         if (nexOutputJobToSolve.getPickup().getSlot() == null) {
             nexOutputJobToSolve.getPickup().setSlot(slot);
         }
 
+        slots.addToGlobalForbiddenSlots(slots.findForbiddenSlots(slot));
+
+        return subSolveOutputJob(nexOutputJobToSolve,slot);
+
+
+    }
+
+    private Job subSolveOutputJob(Job nexOutputJobToSolve,Slot slot) {
         //finding stacked items
         List<Slot> stackedItems = slots.getStackedItemSlots(slot);
 
@@ -106,7 +115,6 @@ public class Solution {
         } else {
             return nexOutputJobToSolve;
         }
-
     }
 
     /**
@@ -160,19 +168,63 @@ public class Solution {
                         otherGantry = gantry1;
                     }
                 }
-                //if gantry is idle -> assign next job
+                //------- Part 1 : Gantry = IDLE ------- //
                 if (gantry.getMode() == Gantry.gantryMode.IDLE) {
-                    if (!precedingJobs.isEmpty()) {
+
+                    //------- Part 1.1 : Gantry = IDLE -> Give Gantry a new job ------- //
+
+                    if (!precedingJobs.isEmpty() &&gantry.getId()==1) {
+
+
                         // assign preceding job
                         Job nextJob = precedingJobs.peek();
+                        boolean allowedToPoll= true;
 
-                        if (nextJob.getPickup().getSlot().getCenterX() < (otherGantry.getCurrentX() + problem.getSafetyDistance())) {
-                            nextJob = precedingJobs.poll();
+                        List<Slot> stacked = slots.getStackedSlots(nextJob.getPickup().getSlot());
+                        /*
+                        if(!stacked.isEmpty() && otherGantry.getCurrentJob()!=null &&
+                                stacked.contains(otherGantry.getCurrentJob().getPickup().getSlot())){
+                            allowedToPoll=false;
+                        }else if(!stacked.isEmpty()){
+                            allowedToPoll=false;
+                        }
+                        */
+                        boolean poll= false;
+                        if(gantry.getId()==0 &&
+                                (nextJob.getPickup().getSlot().getCenterX() < (otherGantry.getCurrentX() - problem.getSafetyDistance())) &&
+                                (nextJob.getPlace().getSlot()==null)&&
+                                allowedToPoll){
+                            nextJob=precedingJobs.poll();
+                            poll=true;
+                        }else if(gantry.getId()==1 &&allowedToPoll){
+                            nextJob=precedingJobs.poll();
+                            poll=true;
+                        }
 
+                        if (poll) {
 
                             if (nextJob.getPlace().getSlot() != null && gantry.getId() == 1) {
                                 gantry.setCurrentJob(nextJob);
+                                slots.removeFromGlobalForbiddenSlots(slots.findForbiddenSlots(nextJob.getPickup().getSlot()));
                             } else if (nextJob.getPlace().getSlot() == null) {
+
+
+                                if(!stacked.isEmpty() && otherGantry.getCurrentJob()!=null &&stacked.size()==1){
+                                    if(stacked.contains(otherGantry.getCurrentJob().getPickup().getSlot())){
+                                        if (gantry.getId()==0){
+                                            gantry.setMoveToX(-15);
+                                            gantry.setMoveToY(5);
+                                        }else{
+                                            gantry.setMoveToX(slots.getOutputSlot().getCenterX());
+                                            gantry.setMoveToY(slots.getOutputSlot().getCenterY());
+                                        }
+
+                                        gantry.setMode(Gantry.gantryMode.MOVE);
+                                        gantry.printStatus(globalTime);
+                                    }
+
+                                }
+
                                 nextJob = solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
                                 gantry.setCurrentJob(nextJob);
                             }
@@ -206,25 +258,33 @@ public class Solution {
                                 nextJob = solvePrecedingJob(nextJob, gantry.getId(), gantry.getCurrentX());
                                 gantry.setCurrentJob(nextJob);
                             } else if (nextJob != null) {
-                                nextJob = outputQueue.poll();
+                                gantry.setCurrentJob(nextJob);
                             }
 
                         }
                         gantry.checkForIdleTransition(globalTime, otherGantry);
                     }
-
-
                 }
+                //------- Part 2 : Gantry = WAIT ------- //
+                if(gantry.getMode()== Gantry.gantryMode.WAIT){
+                    gantry.checkForWaitTransition(globalTime,otherGantry);
+                }
+                if(gantry.getMode()==Gantry.gantryMode.WAIT && otherGantry.getMode()==Gantry.gantryMode.WAIT){
+                    gantry.forceUnlock(globalTime,otherGantry);
+                }
+                //------- Part 3 : Gantry = MOVE ------- //
+                if(gantry.getMode()== Gantry.gantryMode.MOVE){
+                    gantry.checkForMoveTransition(globalTime,otherGantry);
+                }
+                //------- Part 4 : Perform time step ------- //
 
-                //job is assigned, now perform action on time step.
-
-                gantry.performTimeStep(globalTime, gantries);
+                gantry.performTimeStep(globalTime, otherGantry);
 
             }
             System.out.println(globalTime);
             continueLoop = checkLoop();
             globalTime++;
-
+            /*
             HashSet<Slot> slotHashSet = new HashSet<>();
 
             for (Gantry gantry : gantries) {
@@ -238,6 +298,7 @@ public class Solution {
                     slot.setReserved(false);
                 }
             }
+            */
         }
     }
 
@@ -249,6 +310,8 @@ public class Solution {
 
             return false;
         }
+
+        //todo: remove when it all works
         if (globalTime > 300000) return false;
         return true;
     }
